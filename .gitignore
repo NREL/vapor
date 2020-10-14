@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/* 
+*.pyc
+logs/vapor.txt
+cambium_csvs/*
+cambium_processed/*
+*.pkl
+bash_files/*.sh
+*.out
+.vscode/*
+.ipynb_checkpoints/
+.vscode/
+data/PySAM Downloaded Weather Files/*.csv
+data/PySAM Downloaded Weather Files/*.srw

@@ -1,0 +1,12 @@
+numpy
+pandas
+geopandas
+matplotlib
+seaborn
+nrel-pysam
+us
+geocoder
+bayesian-optimization
+jupyter
+mapclassify
+descartes
