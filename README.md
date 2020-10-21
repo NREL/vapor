@@ -13,11 +13,9 @@ Vapor uses input from several existing NREL developed models including Cambium a
 
 ```
 # find the lowest cost PV system in each census region that meets at least 50% of hourly energy. 
-
 python run_cli.py --scenario=StdScen19_Mid_Case --tech=pv --opt_var=adjusted_installed_cost --aggregate_region=census_reg --mode=constrain --goal_pct=50 --goal_type=Hourly
 
 # find the lowest marginal cost wind system in each state with a 100 MW size. 
-
 python run_cli.py --scenario=StdScen19_Mid_Case --tech=wind --opt_var=marginal_cost_mwh --aggregate_region=state --mode=regional
 ```
 
@@ -25,7 +23,8 @@ python run_cli.py --scenario=StdScen19_Mid_Case --tech=wind --opt_var=marginal_c
 
 ## About the Optimization Process
 ![API](images/vapor_api.png)
+
+## Battery Dispatching
 ![Battery Profile](images/battery_profile.png)
 
-
-## *Documentation in progress...*
+### *Documentation in progress...*
