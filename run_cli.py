@@ -62,9 +62,11 @@ def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
     dummy_annual_load_mwh = 100000
 
     if goal_type in ['hourly_energy', 'hourly_co2']:
-        upper_bound_system_size = (dummy_annual_load_mwh / (0.1 * 8760)) * 5 #approx for system capacity to meet 100% of load, times 5
+        upper_bound_system_size = (dummy_annual_load_mwh / (0.1 * 8760)) * 100 #we initially probe this value, divided by [1, 2.5, 5, 10, 25, 50, 100]
+        upper_bound_batt_size = upper_bound_system_size
     elif goal_type in ['annual_recs']:
-        upper_bound_system_size = (dummy_annual_load_mwh / (0.1 * 8760)) * 1
+        upper_bound_system_size = (dummy_annual_load_mwh / (0.1 * 8760)) * 100 #we initially probe this value, divided by [1, 2.5, 5, 10, 25, 50, 100]
+        upper_bound_batt_size = 0 #assuming battery will never be economic in annual calculations
 
     # --- Initialize Pipeline ---
     plumbing = vapor.GoalPipeline(
@@ -73,7 +75,7 @@ def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
         aggregate_region=aggregate_region,
         aggregate_func='sum',
         re_capacity_mw=[2.5, upper_bound_system_size],
-        batt_capacity_mw=[0., upper_bound_system_size],
+        batt_capacity_mw=[0., upper_bound_batt_size],
         batt_duration=[0, 2, 4],
         annual_load_mwh=dummy_annual_load_mwh,
         goal_type=goal_type,

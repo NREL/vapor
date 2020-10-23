@@ -23,7 +23,7 @@ SLURM_MAX_DURATION = '03:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp'
 USER = 'skoebric'
-SLURM_QOS = 'high'
+SLURM_QOS = 'normal'
 
 # --- Define Optimization Variables ---
 mode = 'constraint'
@@ -32,7 +32,7 @@ opt_vars = ['adjusted_installed_cost']
 scenarios = ['StdScen19_Mid_Case']
 techs = ['wind','pv']
 goal_pcts = [25,50,75,95]
-goal_types = ['hourly_energy']
+goal_types = ['hourly_energy','annual_recs']
 
 def write_bash(opt_var, scenario, tech, goal_pct, goal_type):
 

@@ -12,7 +12,7 @@ import os
 NREL_API_KEY = 'OJOhB72tEAwfSX6HF3AUpL6cEebh24cgdjbK7D1X'
 NREL_API_EMAIL = 'sam.koebrich@NREL.gov'
 
-# --- SCOPE ---
+# --- SCOPE / FINANCING ---
 LAST_YEAR = 2050 #run analysis through this year
 SYSTEM_LIFETIME=25
 CAMBIUM_SCENARIO = 'StdScen19_Mid_Case'
@@ -27,26 +27,24 @@ DSCR = 1.4
 BATT_CLEARED_DERATE = 0.97
 DISCOUNT_RATE = 0.064
 
-# --- OPTIMIZATION ---
-OPTIMIZATION = 'Bayesian'
 
 # --- BAYESIAN OPTIMIZATION ---
 DISCRETE_PARAMS = [ #non-continuous parameters that must be evaluated discretely (i.e. array type can't be 1.5)
-        'SystemDesign#subarray1_track_mode',
+        #'SystemDesign#subarray1_track_mode',
         'BatteryTools#desired_capacity',
         'Turbine#turbine_class'
         ]
 
-BAYES_INIT_POINTS = 5
-BAYES_ITER = 95
+BAYES_INIT_POINTS = 10
+BAYES_ITER = 90
 BAYES_ACQ_FUNC = 'ucb' #bayesian acquisition function
-BAYES_KWARGS = {'kappa':15} #higher kappa (i.e. 10) favors exploration, WITHIN the sequential domain reduction
+BAYES_KWARGS = {'kappa':20} #higher kappa (i.e. 10) favors exploration, WITHIN the sequential domain reduction
 
 # --- RESOURCE DATA ---
 RESOURCE_YEAR = 'tmy'
 RESOURCE_INTERVAL_MIN = 60 #minutes
 
 # --- MULTIPROCESSING ---
-PROCESS_WORKERS = int(os.cpu_count() / 2) - 1
-THREAD_WORKERS = int(os.cpu_count() / 2) - 1
+PROCESS_WORKERS = int(os.cpu_count() - 2)
+THREAD_WORKERS = int(os.cpu_count() - 2)
 
