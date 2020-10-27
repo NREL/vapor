@@ -557,6 +557,7 @@ class PVMerchantPlant(GenericMerchantPlant):
         self._size_system()
         self.generator.SystemDesign.assign({k: v for k, v in self.system_config['SystemDesign'].items() if k in list(self.generator.SystemDesign.export().keys())})
         self.generator.SystemDesign.system_capacity = self.fitted_capacity
+        self.generator.SystemDesign.subarray1_backtrack - 0
         self.generator.Lifetime.analysis_period = self.cambium.analysis_period #get analysis period from cambium, which accounts for retirement year
         self.generator.Lifetime.system_use_lifetime_output = 1
         self.generator.Lifetime.dc_degradation = [config.DEGRADATION*100] 

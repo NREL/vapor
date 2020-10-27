@@ -365,7 +365,6 @@ class GoalPipeline():
         
         return best_df
 
-
     def run(self, opt_vars):
         
         # --- Construct list of jobs ---
@@ -373,7 +372,7 @@ class GoalPipeline():
         for region, resource_fp in self.resource_file_dict.items():
             for opt_var in opt_vars:
                 jobs.append((region, resource_fp, opt_var))
-        jobs = reversed(jobs)
+
         # --- Run Jobs ---
         if config.PROCESS_WORKERS > 1: 
             log.info(f'....starting simulations for {len(jobs)} jobs with {config.PROCESS_WORKERS} process workers')

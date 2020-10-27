@@ -220,10 +220,10 @@ class BayesianSimulatorAddon():
         system_config = self._unflatten_param_grid(bayes_grid)
         
         # --- force some variables dependent on others ---
-        if self.tech == 'pv':
-            if system_config['SystemDesign']['subarray1_track_mode'] in [1, 2, 3, 4]: #if not fixed tilt
-                system_config['SystemDesign']['subarray1_tilt'] = 0
-                system_config['SystemDesign']['subarray1_backtrack'] = 0
+        # if self.tech == 'pv':
+        #     if system_config['SystemDesign']['subarray1_track_mode'] in [1, 2, 3, 4]: #if not fixed tilt
+        #         system_config['SystemDesign']['subarray1_tilt'] = 0
+        #         system_config['SystemDesign']['subarray1_backtrack'] = 0
 
         # --- Get output dict ---
         output = self._base_worker(system_config, cambium_variables=[self.opt_var])
@@ -305,51 +305,29 @@ class BayesianSimulatorAddon():
 
         if self.initial_probe:
 
-            # --- probe best guess system config ---
-            if self.tech == 'pv':
-                probe_dict = self.bayes_grid.copy()
-                probe_dict['SystemDesign#subarray1_track_mode'] = 1
-                probe_dict['SystemDesign#subarray1_azimuth'] = 180
-                probe_dict['SystemDesign#subarray1_tilt'] = float(self.resource_file.split('/')[-1].split('_')[1])
-                probe_dict['SystemDesign#dc_ac_ratio'] = 1.2
-                if 'SystemDesign#system_capacity' in probe_dict.keys():
-                    probe_dict['SystemDesign#system_capacity'] = np.mean(probe_dict['SystemDesign#system_capacity'])
-                if 'BatteryTools#desired_power' in probe_dict.keys():
-                    probe_dict['BatteryTools#desired_power'] = 0
-                    probe_dict['BatteryTools#desired_capacity'] = 0
-            elif self.tech == 'wind':
-                probe_dict = self.bayes_grid.copy()
-                probe_dict['Turbine#wind_turbine_hub_ht'] = 100
-                probe_dict['Turbine#turbine_class'] = 7
-                if 'Farm#system_capacity' in probe_dict.keys():
-                    probe_dict['Farm#system_capacity'] = np.mean(probe_dict['Farm#system_capacity'])
-                if 'BatteryTools#desired_power' in probe_dict.keys():
-                    probe_dict['BatteryTools#desired_power'] = 0
-                    probe_dict['BatteryTools#desired_capacity'] = 0
-            optimizer.probe(params=probe_dict, lazy=False)
-
             # --- probe largest system config ---
-            if self.tech == 'pv':
-                probe_dict = self.bayes_grid.copy()
-                probe_dict['SystemDesign#subarray1_track_mode'] = 1
-                probe_dict['SystemDesign#subarray1_azimuth'] = 180
-                probe_dict['SystemDesign#subarray1_tilt'] = float(self.resource_file.split('/')[-1].split('_')[1])
-                probe_dict['SystemDesign#dc_ac_ratio'] = 1.2
-                if 'SystemDesign#system_capacity' in probe_dict.keys():
-                    probe_dict['SystemDesign#system_capacity'] = np.max(probe_dict['SystemDesign#system_capacity'])
-                if 'BatteryTools#desired_power' in probe_dict.keys():
-                    probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power'])
-                    probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
-            elif self.tech == 'wind':
-                probe_dict = self.bayes_grid.copy()
-                probe_dict['Turbine#wind_turbine_hub_ht'] = 100
-                probe_dict['Turbine#turbine_class'] = 7
-                if 'Farm#system_capacity' in probe_dict.keys():
-                    probe_dict['Farm#system_capacity'] = np.max(probe_dict['Farm#system_capacity'])
-                if 'BatteryTools#desired_power' in probe_dict.keys():
-                    probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power'])
-                    probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
-            optimizer.probe(params=probe_dict, lazy=False)
+            for divisor in [1, 2, 4, 8, 16, 32, 64, 128]:
+                if self.tech == 'pv':
+                    probe_dict = self.bayes_grid.copy()
+                    #probe_dict['SystemDesign#subarray1_track_mode'] = 1
+                    probe_dict['SystemDesign#subarray1_azimuth'] = 180
+                    probe_dict['SystemDesign#subarray1_tilt'] = float(self.resource_file.split('/')[-1].split('_')[1])
+                    probe_dict['SystemDesign#dc_ac_ratio'] = 1.2
+                    if 'SystemDesign#system_capacity' in probe_dict.keys():
+                        probe_dict['SystemDesign#system_capacity'] = np.max(probe_dict['SystemDesign#system_capacity']) / divisor
+                    if 'BatteryTools#desired_power' in probe_dict.keys():
+                        probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power']) / divisor
+                        probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
+                elif self.tech == 'wind':
+                    probe_dict = self.bayes_grid.copy()
+                    probe_dict['Turbine#wind_turbine_hub_ht'] = 100
+                    probe_dict['Turbine#turbine_class'] = 7
+                    if 'Farm#system_capacity' in probe_dict.keys():
+                        probe_dict['Farm#system_capacity'] = np.max(probe_dict['Farm#system_capacity'])  / divisor
+                    if 'BatteryTools#desired_power' in probe_dict.keys():
+                        probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power'])  / divisor
+                        probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
+                optimizer.probe(params=probe_dict, lazy=False)
         
         # --- run optimizer ---
         optimizer.maximize(
@@ -461,7 +439,7 @@ class MeetGoalAddon():
             pct_fulfilled = (1 - (value_with_sys / value_without_sys)) * 100
         pct_fulfilled = round(pct_fulfilled, 1) #ie 99.999 = 100
 
-        print(self.region, 'pct_fulfilled:', pct_fulfilled, 'score:', score)
+        log.info(f"{self.region} -- pct_fulfilled: {pct_fulfilled} score: {score}")
         if pct_fulfilled >= self.goal_pct:
             return score
         else:
