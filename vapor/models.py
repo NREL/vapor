@@ -143,11 +143,7 @@ class Cambium():
     def calc_cambium_lifetime_rev(self, gen, var, inflation=config.INFLATION, lower_thresh=0.01):
         """saves a temp 2D array with lifetime 'cleared' energy and hourly revenue."""
 
-        # --- If a SAM var (not cambium) optimize rev with cambium grid value as revenue ---
-        if var in self.variables:
-            pass
-        else:
-            var = 'cambium_grid_value'
+        assert var in self.variables
 
         rev = pd.DataFrame(self.cambium_df.loc[(self.cambium_df['variable'] == var), 'value'])
 
@@ -530,7 +526,7 @@ class PVMerchantPlant(GenericMerchantPlant):
         assert len(self.gen_profile) == 8760 * self.cambium.analysis_period
 
     def make_market_profile(self):
-        self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_total_value')
+        self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_grid_value')
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
 
     def _size_system(self):
@@ -580,7 +576,7 @@ class WindMerchantPlant(GenericMerchantPlant):
         assert len(self.gen_profile) == 8760 * self.cambium.analysis_period
 
     def make_market_profile(self):
-        self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_total_value')
+        self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_grid_value')
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
 
     def _set_num_turbines_in_row(self, n_turbines, rotor_diameter=77, spacing=None, angle_deg=0):
@@ -602,7 +598,7 @@ class WindMerchantPlant(GenericMerchantPlant):
     def _size_system(self):
         # --- calc layout of farm ---
         self.desired_farm_kw = self.system_config['Farm']['system_capacity']
-        self.turbine_kw = 2400 #based on ATB
+        self.turbine_kw = min(self.desired_farm_kw, 2400) #based on ATB
         self.n_turbines = int(self.desired_farm_kw // self.turbine_kw)
         self.n_turbines = min(300, self.n_turbines) #SAM maximum
         self.fitted_capacity = self.n_turbines * self.turbine_kw

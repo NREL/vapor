@@ -14,7 +14,6 @@ def regional(scenario, tech, aggregate_region, batt_size, batt_duration, opt_var
                 scenario=scenario,
                 tech=tech,
                 aggregate_region=aggregate_region,
-                aggregate_func='sum',
                 re_capacity_mw=100,
                 batt_capacity_mw=batt_size,
                 batt_duration=batt_duration
@@ -73,7 +72,6 @@ def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
         scenario=scenario,
         tech=tech,
         aggregate_region=aggregate_region,
-        aggregate_func='sum',
         re_capacity_mw=[2.5, upper_bound_system_size],
         batt_capacity_mw=[0., upper_bound_batt_size],
         batt_duration=[0, 2, 4],

@@ -92,7 +92,7 @@ class Visualizer():
             self.colorscheme = self.colorscheme + '_r' #reverse colormap
             self.suffix = 'Price'
             
-        elif column in ['cambium_enduse_energy_value','cambium_busbar_energy_value','cambium_total_value',
+        elif column in ['cambium_enduse_energy_value','cambium_busbar_energy_value','cambium_grid_value',
                         'cambium_capacity_value','cambium_as_value','cambium_policy_revenue']:
             self.units = '$/MW/yr'
             unit_df[column] = unit_df[column] / MW_size #TODO: check units
@@ -102,7 +102,7 @@ class Visualizer():
             self.units = '%'
             self.suffix = ''
 
-        elif column in ['project_return_aftertax_npv', 'lifetime_cambium_total_value']:
+        elif column in ['project_return_aftertax_npv', 'lifetime_cambium_grid_value']:
             unit_df[column] = unit_df[column] / 1000000
             self.units = '$ Mil'
             self.suffix = ''
