@@ -35,8 +35,8 @@ DISCRETE_PARAMS = [ #non-continuous parameters that must be evaluated discretely
         'Turbine#turbine_class'
         ]
 
-BAYES_INIT_POINTS = 10
-BAYES_ITER = 90
+BAYES_INIT_POINTS = 5
+BAYES_ITER = 75
 BAYES_ACQ_FUNC = 'ucb' #bayesian acquisition function
 BAYES_KWARGS = {'kappa':20} #higher kappa (i.e. 10) favors exploration, WITHIN the sequential domain reduction
 

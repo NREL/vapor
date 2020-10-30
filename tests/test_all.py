@@ -79,7 +79,6 @@ def test_optimize():
         param_grid=param_grid,
         tech='pv',
         aggregate_region='census_reg',
-        aggregate_func='sum',
         region='MTN',
         opt_var='marginal_cost_mwh',
         resource_file=resource_file,

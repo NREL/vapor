@@ -42,8 +42,7 @@ class GenericSystemSimulator():
                  tech, param_grid,
                  aggregate_region,
                  region, resource_file,
-                 aggregate_func,
-                 initial_probe=True,
+                 probe_divisors=[1],
                  opt_var=None, cambium_df=None,
                  analysis_period=None, construction_year=None,
                  buildingload=None,
@@ -56,10 +55,9 @@ class GenericSystemSimulator():
         self.tech = tech
         self.opt_var = opt_var
         self.resource_file = resource_file
-        self.aggregate_func = aggregate_func
         self.region = region
         self.aggregate_region = aggregate_region
-        self.initial_probe = initial_probe
+        self.probe_divisors = probe_divisors
 
         self.buildingload=buildingload
         self.goal_type=goal_type
@@ -91,7 +89,7 @@ class GenericSystemSimulator():
         return outputs
 
 
-    def _cambium_pipeline(self, generation, cambium_variables):
+    def _cambium_pipeline(self, generation):
         """
         Calculate average annual impact through 2050 for cambium variables.
         For annual results, see get_cambium_ts(). #TODO
@@ -105,11 +103,8 @@ class GenericSystemSimulator():
         generation = np.array(generation) / 1000  # kW to MWh
         generation = generation[:, np.newaxis] #wide to tall
 
-        if cambium_variables == None:
-            cambium_vaiables = self.cambium.variables
-
         outputs = {}
-        for var in cambium_variables:
+        for var in self.cambium.variables:
 
             # --- calc lifetime values ---
             lifetime_product = self.cambium.calc_cambium_lifetime_product(generation, var)
@@ -128,7 +123,7 @@ class GenericSystemSimulator():
         return outputs
 
 
-    def _base_worker(self, system_config, cambium_variables=None):
+    def _base_worker(self, system_config):
         """
         Worker for multiprocessing execution of PySAM parametric analysis.
 
@@ -151,7 +146,7 @@ class GenericSystemSimulator():
                 assert len(generation) == 8760 * self.cambium.analysis_period
             except Exception as e:
                 breakpoint()
-            cambium_outputs = self._cambium_pipeline(generation, cambium_variables=cambium_variables)
+            cambium_outputs = self._cambium_pipeline(generation)
         else:
             cambium_outputs = {}
 
@@ -173,7 +168,7 @@ class GenericSystemSimulator():
                                 'cambium_grid_value',
                                 'cambium_as_value',
                                 'cambium_policy_value',
-                                'cambium_total_value',
+                                'cambium_grid_value',
                                 'cambium_co2_rate_avg',
                                 'cambium_co2_rate_marg']:
             return True
@@ -199,11 +194,10 @@ class BayesianSimulatorAddon():
         output['lifetime_output_mwh'] = output['lifetime_gen_profile'].sum() / 1000
         output['marginal_cost_mwh'] = output['project_return_aftertax_npv'] / output['lifetime_output_mwh'] * -1
 
-        for cambium_var in ['cambium_busbar_energy_value','cambium_capacity_value','cambium_policy_value','cambium_total_value','co2_rate_avg','co2_rate_marginal']:
+        for cambium_var in self.cambium.variables:
             output[f"lifetime_{cambium_var}"] = self.cambium.calc_cambium_lifetime_sum(gen=output['lifetime_gen_profile'], var=cambium_var)
 
-        output['total_value_per_mwh'] = output['lifetime_cambium_total_value'] / output['lifetime_output_mwh']
-
+        output['grid_value_per_mwh'] = output['lifetime_cambium_grid_value'] / output['lifetime_output_mwh']
         return output
 
     def _worker_return_score(self, **kwargs):
@@ -226,14 +220,14 @@ class BayesianSimulatorAddon():
         #         system_config['SystemDesign']['subarray1_backtrack'] = 0
 
         # --- Get output dict ---
-        output = self._base_worker(system_config, cambium_variables=[self.opt_var])
+        output = self._base_worker(system_config)
 
         # --- Create new outputs ---
         output = self._create_output_metrics(output)
 
         # --- Fetch score ---
         if self.opt_var in self.cambium.variables:
-            score = output[f"{self.opt_var}_{self.aggregate_func}"]
+            score = output[f"{self.opt_var}_sum"]
         else:
             score = output[self.opt_var]
 
@@ -302,32 +296,30 @@ class BayesianSimulatorAddon():
             verbose=1,
             bounds_transformer=bounds_transformer,
         )
-
-        if self.initial_probe:
-
-            # --- probe largest system config ---
-            for divisor in [1, 2, 4, 8, 16, 32, 64, 128]:
-                if self.tech == 'pv':
-                    probe_dict = self.bayes_grid.copy()
-                    #probe_dict['SystemDesign#subarray1_track_mode'] = 1
-                    probe_dict['SystemDesign#subarray1_azimuth'] = 180
-                    probe_dict['SystemDesign#subarray1_tilt'] = float(self.resource_file.split('/')[-1].split('_')[1])
-                    probe_dict['SystemDesign#dc_ac_ratio'] = 1.2
-                    if 'SystemDesign#system_capacity' in probe_dict.keys():
-                        probe_dict['SystemDesign#system_capacity'] = np.max(probe_dict['SystemDesign#system_capacity']) / divisor
-                    if 'BatteryTools#desired_power' in probe_dict.keys():
-                        probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power']) / divisor
-                        probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
-                elif self.tech == 'wind':
-                    probe_dict = self.bayes_grid.copy()
-                    probe_dict['Turbine#wind_turbine_hub_ht'] = 100
-                    probe_dict['Turbine#turbine_class'] = 7
-                    if 'Farm#system_capacity' in probe_dict.keys():
-                        probe_dict['Farm#system_capacity'] = np.max(probe_dict['Farm#system_capacity'])  / divisor
-                    if 'BatteryTools#desired_power' in probe_dict.keys():
-                        probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power'])  / divisor
-                        probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
-                optimizer.probe(params=probe_dict, lazy=False)
+        
+        # --- probe largest system config ---
+        for divisor in self.probe_divisors:
+            if self.tech == 'pv':
+                probe_dict = self.bayes_grid.copy()
+                #probe_dict['SystemDesign#subarray1_track_mode'] = 1
+                probe_dict['SystemDesign#subarray1_azimuth'] = 180
+                probe_dict['SystemDesign#subarray1_tilt'] = float(self.resource_file.split('/')[-1].split('_')[1])
+                probe_dict['SystemDesign#dc_ac_ratio'] = 1.2
+                if 'SystemDesign#system_capacity' in probe_dict.keys():
+                    probe_dict['SystemDesign#system_capacity'] = np.max(probe_dict['SystemDesign#system_capacity']) / divisor
+                if 'BatteryTools#desired_power' in probe_dict.keys():
+                    probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power']) / divisor
+                    probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
+            elif self.tech == 'wind':
+                probe_dict = self.bayes_grid.copy()
+                probe_dict['Turbine#wind_turbine_hub_ht'] = 100
+                probe_dict['Turbine#turbine_class'] = 7
+                if 'Farm#system_capacity' in probe_dict.keys():
+                    probe_dict['Farm#system_capacity'] = np.max(probe_dict['Farm#system_capacity'])  / divisor
+                if 'BatteryTools#desired_power' in probe_dict.keys():
+                    probe_dict['BatteryTools#desired_power'] = np.max(probe_dict['BatteryTools#desired_power'])  / divisor
+                    probe_dict['BatteryTools#desired_capacity'] = np.max(probe_dict['BatteryTools#desired_capacity'])
+            optimizer.probe(params=probe_dict, lazy=False)
         
         # --- run optimizer ---
         optimizer.maximize(
@@ -338,13 +330,12 @@ class BayesianSimulatorAddon():
         )
 
         # --- rerun best system with no battery ---
-        # if self.initial_probe:
-        #     best_params = optimizer.max['params'] 
-        #     if 'BatteryTools#desired_capacity' in best_params.keys(): #rerun system without battery
-        #         if (best_params['BatteryTools#desired_capacity'] > 0) | (best_params['BatteryTools#desired_power'] > 0):
-        #             best_params['BatteryTools#desired_capacity'] = 0
-        #             best_params['BatteryTools#desired_power'] = 0
-        #             optimizer.probe(params=best_params, lazy=False)
+        best_params = optimizer.max['params'] 
+        if 'BatteryTools#desired_capacity' in best_params.keys(): #rerun system without battery
+            if (best_params['BatteryTools#desired_capacity'] > 0) | (best_params['BatteryTools#desired_power'] > 0):
+                best_params['BatteryTools#desired_capacity'] = 0
+                best_params['BatteryTools#desired_power'] = 0
+                optimizer.probe(params=best_params, lazy=False)
 
         # --- best score ---
         best_score = optimizer.max['target']  # currently unused
@@ -363,7 +354,7 @@ class BayesianSimulatorAddon():
         self.best_params = self._unflatten_param_grid(self.best_params)
 
         # --- rerun best params ---
-        output = self._base_worker(self.best_params, cambium_variables=[self.opt_var])
+        output = self._base_worker(self.best_params)
 
         # --- Create new outputs ---
         output = self._create_output_metrics(output)

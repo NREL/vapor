@@ -18,12 +18,12 @@ HPC = 'eagle'
 
 # Eagle:
 SLURM_ACCOUNT = 'vapor'
-SLURM_MIN_DURATION = '00:30:00'
-SLURM_MAX_DURATION = '01:00:00'
+SLURM_MIN_DURATION = '00:60:00'
+SLURM_MAX_DURATION = '01:30:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp'
 USER = 'skoebric'
-SLURM_QOS = 'high'
+SLURM_QOS = 'normal'
 
 # --- Define Optimization Variables ---
 mode = 'regional'
@@ -31,7 +31,7 @@ aggregate_region = 'state'
 opt_vars = ['marginal_cost_mwh']
 scenarios = ['StdScen19_High_RE_Cost', 'StdScen19_Low_RE_Cost', 'StdScen19_Mid_Case']
 techs = ['pv', 'wind']
-batt_sizes = [0, 25, 100]
+batt_sizes = [25, 100]
 batt_durations = [4]
 
 def write_bash(opt_var, scenario, tech, batt_size, batt_duration):

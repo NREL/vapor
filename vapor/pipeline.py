@@ -39,7 +39,6 @@ class RegionalPipeline():
     def __init__(self, 
                 tech, 
                 aggregate_region,
-                aggregate_func='per_kwh',
                 scenario=config.CAMBIUM_SCENARIO,
                 cambium_last_year=config.LAST_YEAR,
                 re_capacity_mw=100,
@@ -56,7 +55,6 @@ class RegionalPipeline():
         self.re_capacity_mw = re_capacity_mw
         self.batt_capacity_mw = batt_capacity_mw
         self.batt_duration = batt_duration
-        self.aggregate_func = aggregate_func
         self.scenario = scenario
 
         # --- Initialize Attributes ---
@@ -107,7 +105,6 @@ class RegionalPipeline():
                                             param_grid=self.param_grid,
                                             tech=self.tech,
                                             aggregate_region=self.aggregate_region,
-                                            aggregate_func=self.aggregate_func,
                                             region=region,
                                             opt_var=opt_var,
                                             resource_file=resource_fp,
@@ -160,7 +157,6 @@ class ExistingPipeline():
                 aggregate_region,
                 scenario,
                 optimization='Bayesian',
-                aggregate_func='per_kwh',
                 cambium_last_year=config.LAST_YEAR):
         
         assert optimization in ['Bayesian'] #PARAMETRIC DEPRECATED
@@ -213,12 +209,10 @@ class ExistingPipeline():
                                             param_grid=param_grid,
                                             tech=row['tech'],
                                             aggregate_region=self.aggregate_region,
-                                            aggregate_func='per_kwh',
                                             region=row['region'],
                                             opt_var=opt_var,
                                             resource_file=row['resource_fp'],
                                             cambium_df=self.cambium_df,
-                                            initial_probe=False,
                                             construction_year=row['ppa_estimated_signing_year'])
 
         simulator.simulate()
@@ -267,7 +261,6 @@ class GoalPipeline():
     def __init__(self, 
                 tech, 
                 aggregate_region,
-                aggregate_func='per_kwh',
                 scenario=config.CAMBIUM_SCENARIO,
                 cambium_last_year=config.LAST_YEAR,
                 re_capacity_mw=[0,300],
@@ -290,7 +283,6 @@ class GoalPipeline():
         self.re_capacity_mw = re_capacity_mw
         self.batt_capacity_mw = batt_capacity_mw
         self.batt_duration = batt_duration
-        self.aggregate_func = aggregate_func
         self.scenario = scenario
         self.annual_load_mwh = annual_load_mwh
         self.goal_type = goal_type
@@ -349,12 +341,12 @@ class GoalPipeline():
                                             param_grid=self.param_grid,
                                             tech=self.tech,
                                             aggregate_region=self.aggregate_region,
-                                            aggregate_func=self.aggregate_func,
                                             region=region,
                                             opt_var=opt_var,
                                             resource_file=resource_fp,
                                             cambium_df=self.cambium_df,
                                             buildingload=self.buildingload,
+                                            probe_divisors=[1, 2, 4, 8, 16, 32, 64, 128],
                                             goal_type=self.goal_type,
                                             goal_pct=self.goal_pct)
         simulator.simulate()
