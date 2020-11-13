@@ -504,14 +504,15 @@ class GenericMerchantPlant():
         self.make_market_profile()
         self.run_financial()
 
-        self.outputs = {**self.financial.Outputs.export(), **self.generator.Outputs.export()}
-        self.outputs = {k:v for k,v in self.outputs.items() if isinstance(v, (str, float, int))}
-
         if self.storage:
+            self.outputs = {**self.financial.Outputs.export(), **self.generator.Outputs.export(), **self.storage.Outputs.export()}
+            self.outputs = {k:v for k,v in self.outputs.items() if isinstance(v, (str, float, int))}
             self.outputs['lifetime_gen_profile'] = np.array(self.battery.Outputs.pv_to_load) +\
                                                     np.array(self.battery.Outputs.batt_to_load) +\
                                                     np.array(self.battery.Outputs.pv_to_grid)
         else:
+            self.outputs = {**self.financial.Outputs.export(), **self.generator.Outputs.export()}
+            self.outputs = {k:v for k,v in self.outputs.items() if isinstance(v, (str, float, int))}
             self.outputs['lifetime_gen_profile'] = np.clip(self.generator.Outputs.gen, a_min=0, a_max=None) #clip parasitic loss to get pv_to_load + batt_to_load + pv_to_grid
 
 class PVMerchantPlant(GenericMerchantPlant):
