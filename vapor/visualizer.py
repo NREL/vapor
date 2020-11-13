@@ -74,14 +74,14 @@ class Visualizer():
         """Update the CRS to US National Atlas Standard (non-meractor)."""
         self.gdf= self.gdf.to_crs(f'epsg:{crs}')
     
-    def _update_units(self, column, round_at=1):
+    def _update_units(self, column, round_at=0):
         """Update units for the selected column."""
         
         unit_df = self.gdf.copy()
 
         MW_size = unit_df['system_capacity'] / 1000
 
-        if column in ['cambium_co2_rate_marg', 'cambium_co2_rate_avg', 'lifetime_co2_rate_marginal']:
+        if column in ['cambium_co2_rate_marg', 'cambium_co2_rate_avg', 'lifetime_cambium_co2_rate_marginal', 'lifetime_cambium_co2_rate_avg']:
             self.units = 'Mil Tons'
             unit_df[column] = unit_df[column] / 1000000 #convert from kg/W to MT/MW
             self.suffix = 'Savings'

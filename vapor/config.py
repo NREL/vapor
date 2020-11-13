@@ -45,6 +45,6 @@ RESOURCE_YEAR = 'tmy'
 RESOURCE_INTERVAL_MIN = 60 #minutes
 
 # --- MULTIPROCESSING ---
-PROCESS_WORKERS = int(os.cpu_count() - 2)
-THREAD_WORKERS = int(os.cpu_count() - 2)
+PROCESS_WORKERS = int(os.cpu_count() / 2) - 2
+THREAD_WORKERS = int(os.cpu_count() / 2) - 2
 
