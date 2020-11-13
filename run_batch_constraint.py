@@ -18,8 +18,8 @@ HPC = 'eagle'
 
 # Eagle:
 SLURM_ACCOUNT = 'vapor'
-SLURM_MIN_DURATION = '00:60:00'
-SLURM_MAX_DURATION = '03:00:00'
+SLURM_MIN_DURATION = '04:00:00'
+SLURM_MAX_DURATION = '06:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp'
 USER = 'skoebric'
@@ -27,9 +27,9 @@ SLURM_QOS = 'normal'
 
 # --- Define Optimization Variables ---
 mode = 'constraint'
-aggregate_region = 'state'
+aggregate_region = 'pca'
 opt_vars = ['adjusted_installed_cost']
-scenarios = ['StdScen19_Mid_Case']
+scenarios = ['StdScen20_MidCase']
 techs = ['wind','pv']
 goal_pcts = [25,50,75,95]
 goal_types = ['hourly_energy','annual_recs']

@@ -9,7 +9,7 @@ def test_wind_no_storage():
                                                                                                                                                                                                                                                                                                                             'forecast_price_signal_model': 1, 'mp_enable_ancserv1': 0, 'mp_enable_ancserv2': 0, 'mp_enable_ancserv3': 0, 'mp_enable_ancserv4': 0}, 'BatterySystem': {'en_batt': 1, 'batt_meter_position': 1}, 'BatteryDispatch': {'batt_dispatch_auto_can_charge': 1, 'batt_dispatch_auto_can_clipcharge': 1, 'batt_dispatch_auto_can_gridcharge': 1, 'batt_dispatch_choice': 1}}
     resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_wtk_60_2012.srw'
 
-    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen19_Mid_Case')
+    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen20_MidCase')
     cambium = Cambium(cambium_df, 'inter', 'western', resource_file)
     cambium.clean()
 
@@ -23,7 +23,7 @@ def test_wind_storage():
                                                                                                                                                                                                                                                                                                                                   'forecast_price_signal_model': 1, 'mp_enable_ancserv1': 0, 'mp_enable_ancserv2': 0, 'mp_enable_ancserv3': 0, 'mp_enable_ancserv4': 0}, 'BatterySystem': {'en_batt': 1, 'batt_meter_position': 1}, 'BatteryDispatch': {'batt_dispatch_auto_can_charge': 1, 'batt_dispatch_auto_can_clipcharge': 1, 'batt_dispatch_auto_can_gridcharge': 1, 'batt_dispatch_choice': 1}}
     resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_wtk_60_2012.srw'
 
-    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen19_Mid_Case')
+    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen20_MidCase')
     cambium = Cambium(cambium_df, 'inter', 'western', resource_file)
     cambium.clean()
 
@@ -37,7 +37,7 @@ def test_pv_no_storage():
                      'PriceSignal': {'mp_enable_energy_market_revenue': 0, 'forecast_price_signal_model': 1, 'mp_enable_ancserv1': 0, 'mp_enable_ancserv2': 0, 'mp_enable_ancserv3': 0, 'mp_enable_ancserv4': 0}, 'BatterySystem': {'en_batt': 1, 'batt_meter_position': 1}, 'BatteryDispatch': {'batt_dispatch_auto_can_charge': 1, 'batt_dispatch_auto_can_clipcharge': 1, 'batt_dispatch_auto_can_gridcharge': 1, 'batt_dispatch_choice': 1}}
     resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_psm3_60_tmy.csv'
 
-    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen19_Mid_Case')
+    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen20_MidCase')
     cambium = Cambium(cambium_df, 'inter', 'western', resource_file)
     cambium.clean()
 
@@ -50,7 +50,7 @@ def test_pv_storage():
                      'PriceSignal': {'mp_enable_energy_market_revenue': 0, 'forecast_price_signal_model': 1, 'mp_enable_ancserv1': 0, 'mp_enable_ancserv2': 0, 'mp_enable_ancserv3': 0, 'mp_enable_ancserv4': 0}, 'BatterySystem': {'en_batt': 1, 'batt_meter_position': 1}, 'BatteryDispatch': {'batt_dispatch_auto_can_charge': 1, 'batt_dispatch_auto_can_clipcharge': 1, 'batt_dispatch_auto_can_gridcharge': 1, 'batt_dispatch_choice': 1}}
     resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_psm3_60_tmy.csv'
 
-    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen19_Mid_Case')
+    cambium_df = datafetcher.load_cambium_data(aggregate_region='inter', scenario='StdScen20_MidCase')
     cambium = Cambium(cambium_df, 'inter', 'western', resource_file)
     cambium.clean()
 
@@ -70,7 +70,7 @@ def test_optimize():
 
     resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_psm3_60_tmy.csv'
 
-    cambium_df = load_cambium_data(aggregate_region='census_reg', scenario='StdScen19_Mid_Case')
+    cambium_df = load_cambium_data(aggregate_region='census_reg', scenario='StdScen20_MidCase')
 
     vapor.config.BAYES_INIT_POINTS=2
     vapor.config.BAYES_ITER=3

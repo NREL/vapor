@@ -95,7 +95,7 @@ def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
 if __name__ == "__main__":
     # --- CLI arguments ---
     parser = argparse.ArgumentParser()
-    parser.add_argument('--scenario', type=str, default='StdScen19_Mid_Case')
+    parser.add_argument('--scenario', type=str, default='StdScen20_MidCase')
     parser.add_argument('--tech', type=str, default='pv')
     parser.add_argument('--aggregate_region', type=str, default='census_reg')
     parser.add_argument('--batt_size', type=float, default=100)
