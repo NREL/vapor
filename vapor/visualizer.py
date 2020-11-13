@@ -37,9 +37,9 @@ tech_dict = {'pv':nrel_color_dict[4],
 batt_size_dict = {0:'o', 25:'P', 100:'^'}
 
 scen_label_dict = {
-    'StdScen19_Low_RE_Cost':'Low Wholesale Cost',
-    'StdScen19_Mid_Case':'Baseline Cost',
-    'StdScen19_High_RE_Cost':'High Wholesale Cost'}
+    'StdScen20_LowRECost':'Low Wholesale Cost',
+    'StdScen20_MidCase':'Baseline Cost',
+    'StdScen20_HighRECost':'High Wholesale Cost'}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~ VISUALIZATION OF OUTPUT ~~~~~~~~~~~~~~~~~~~~~
@@ -93,7 +93,7 @@ class Visualizer():
             self.suffix = 'Price'
             
         elif column in ['cambium_enduse_energy_value','cambium_busbar_energy_value','cambium_grid_value',
-                        'cambium_capacity_value','cambium_as_value','cambium_policy_revenue']:
+                        'cambium_capacity_value','cambium_as_value','cambium_portfolio_revenue']:
             self.units = '$/MW/yr'
             unit_df[column] = unit_df[column] / MW_size #TODO: check units
             self.suffix = 'Savings'
@@ -263,7 +263,7 @@ class Visualizer():
 
         fig, axs = plt.subplots(figsize=(8,4), dpi=400, ncols=3)
 
-        for i, s in enumerate(['StdScen19_Low_RE_Cost', 'StdScen19_Mid_Case', 'StdScen19_High_RE_Cost']):
+        for i, s in enumerate(['StdScen20_LowRECost', 'StdScen20_MidCase', 'StdScen20_HighRECost']):
             scenario_df = plot_df.loc[plot_df['scenario'] == s]
 
             # --- pick best tech for each geo ---
@@ -364,7 +364,7 @@ class Visualizer():
         fig, axs = plt.subplots(figsize=(10,6), nrows=2, ncols=3, sharey=True, dpi=400)
 
 
-        for i_scenario, s in enumerate(['StdScen19_Low_RE_Cost', 'StdScen19_Mid_Case', 'StdScen19_High_RE_Cost']):
+        for i_scenario, s in enumerate(['StdScen20_LowRECost', 'StdScen20_MidCase', 'StdScen20_HighRECost']):
             for i_tech, tech in enumerate(['pv','wind']):
                 for b in set(plot_df['batt_size']):
                     scenario_df = plot_df.loc[(plot_df['scenario'] == s) & (plot_df['batt_size'] == b) & (plot_df['tech'] == tech)]

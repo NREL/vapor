@@ -15,7 +15,7 @@ NREL_API_EMAIL = 'sam.koebrich@NREL.gov'
 # --- SCOPE / FINANCING ---
 LAST_YEAR = 2050 #run analysis through this year
 SYSTEM_LIFETIME=25
-CAMBIUM_SCENARIO = 'StdScen19_Mid_Case'
+CAMBIUM_SCENARIO = 'StdScen20_MidCase'
 COST_SCENARIO = 'Mid' 
 INFLATION = 0.025
 DEGRADATION = 0.05
@@ -45,6 +45,6 @@ RESOURCE_YEAR = 'tmy'
 RESOURCE_INTERVAL_MIN = 60 #minutes
 
 # --- MULTIPROCESSING ---
-PROCESS_WORKERS = int(os.cpu_count() / 2) - 2
-THREAD_WORKERS = int(os.cpu_count() / 2) - 2
+PROCESS_WORKERS = 8#int(os.cpu_count() / 2)
+THREAD_WORKERS = 8#int(os.cpu_count() / 2)
 

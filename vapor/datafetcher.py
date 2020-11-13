@@ -38,7 +38,7 @@ def load_cambium_data(aggregate_region,
                       inflation=config.INFLATION,
                       save_processed=True, cambium_path=None):
     """Turn cambium data into a single long_df."""
-    assert scenario in ['StdScen19_High_RE_Cost','StdScen19_Low_RE_Cost','StdScen19_Mid_Case']
+    assert scenario in ['StdScen20_HighRECost','StdScen20_LowRECost','StdScen20_MidCase']
     if cambium_path == None: #Deal with possible user passed path
         cambium_path = os.path.join('data','cambium_processed',f"{scenario}_{aggregate_region}.pkl")
     
@@ -56,34 +56,37 @@ def load_cambium_data(aggregate_region,
         scenario_csvs = [i for i in all_csvs if scenario in i] #filter scenario
         scenario_csvs = [i for i in scenario_csvs if '_hourly_' in i] #the right csvs
         scenario_csvs.sort()
-        assert len(scenario_csvs) == 134 #if files are broken down by pca
+        # breakpoint()
+        # assert len(scenario_csvs) == 134 * 17 #if files are broken down by pca and year
         
         dfs = []
         for c in scenario_csvs:
-            pca = c.split('_')[-1].replace('.csv','')
-            log.info(f'....Working on {pca}')
-            c_df = pd.read_csv(os.path.join('data','cambium_csvs', c))
+            pca = c.split('_')[-2]
+            y = c.split('_')[-1].replace('.csv', '')
+            log.info(f'....Working on {pca} for {y}')
+            c_df = pd.read_csv(os.path.join('data','cambium_csvs', c), skiprows=2)
+            c_df['pca'] = pca
             
             # --- Rename Columns ---
-            rename_cols = {'r':'pca',
-                           'energy_cost_busbar':'cambium_busbar_energy_value',
-                           'capacity_cost_busbar':'cambium_capacity_value',
-                           'policy_cost_busbar':'cambium_policy_value',
-                           'co2_rate_avg_gen':'cambium_co2_rate_avg',
-                           'ancillary_service_cost_busbar':'cambium_as_value'}
+            #TODO: re-add ancillary services
+            rename_cols = {
+                    'energy_cost_busbar':'cambium_busbar_energy_value',
+                    'capacity_cost_busbar':'cambium_capacity_value',
+                    'portfolio_cost_busbar':'cambium_portfolio_value',
+                    'co2_rate_avg_gen':'cambium_co2_rate_avg',
+                        }
             c_df = c_df.rename(rename_cols, axis='columns')
 
             # --- Calc total grid value ---
             c_df['cambium_grid_value'] = c_df[['cambium_busbar_energy_value',
                                                'cambium_capacity_value',
-                                               'cambium_policy_value']].sum(axis=1)
+                                               'cambium_portfolio_value']].sum(axis=1)
             
             # --- Subset ---
             keep_cols = ['cambium_busbar_energy_value',
                          'cambium_capacity_value',
-                         'cambium_policy_value',
+                         'cambium_portfolio_value',
                          'cambium_co2_rate_avg',
-                         'cambium_as_value',
                          'cambium_grid_value',
                          'pca','timestamp']
             c_df = c_df[keep_cols]

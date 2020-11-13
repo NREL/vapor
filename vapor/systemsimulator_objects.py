@@ -165,9 +165,8 @@ class GenericSystemSimulator():
                                 'cambinum_capacity_value',
                                 'cambium_busbar_energy_value',
                                 'cambium_enduse_energy_value',
-                                'cambium_grid_value',
                                 'cambium_as_value',
-                                'cambium_policy_value',
+                                'cambium_portfolio_value',
                                 'cambium_grid_value',
                                 'cambium_co2_rate_avg',
                                 'cambium_co2_rate_marg']:
@@ -198,6 +197,7 @@ class BayesianSimulatorAddon():
             output[f"lifetime_{cambium_var}"] = self.cambium.calc_cambium_lifetime_sum(gen=output['lifetime_gen_profile'], var=cambium_var)
 
         output['grid_value_per_mwh'] = output['lifetime_cambium_grid_value'] / output['lifetime_output_mwh']
+        output['lifetime_cambium_co2_rate_avg_mwh'] = output['lifetime_cambium_co2_rate_avg'] / output['lifetime_output_mwh']
         return output
 
     def _worker_return_score(self, **kwargs):
