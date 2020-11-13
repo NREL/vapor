@@ -1,0 +1,10 @@
+Census Division,Technology,Installed Capacity (MW),Cambium 2020 Avoided CO2 (Tons),Cambium 2020 Grid Value of Energy (Mill. $)
+South,Solar PV," 11,463 "," 2,639 ", $721 
+,Wind," 9,974 "," 2,795 "," $1,014 "
+Midwest,Solar PV," 1,032 ", 423 , $56 
+,Wind," 7,072 "," 4,734 ", $683 
+West,Solar PV," 4,200 "," 1,232 ", $240 
+,Wind," 1,174 ", 282 , $79 
+Northeast,Solar PV," 1,424 ", 224 , $82 
+,Wind, 209 , 69 , $19 
+Total,," 36,549 "," 12,397 "," $2,894 "
