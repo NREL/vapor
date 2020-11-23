@@ -5,6 +5,10 @@ Vapor seeks to optimize renewable energy system siting, design, and (when releva
 
 Vapor uses input from several existing NREL developed models including Cambium and ReEDS. When complete, Vapor will be able to estimate the economically optimal renewable energy system for a voluntary actor to procure within a given set of constraints (geographic, goal oriented, cost) that will provide the most value (in terms of customer value, grid value, or emission reductions) based on an hourly analysis across the entire system’s lifetime. 
 
+## Set Up Vapor
+- Download Cambium
+- Set up env
+
 ## Running Vapor
 `run_cli.py` provides a high level interface to run vapor in three modes:
 - *Existing*: a simulation of the grid impacts of existing known voluntary procurements in the United States from Bloomberg New Energy Finance's PPA database. 
