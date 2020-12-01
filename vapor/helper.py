@@ -112,7 +112,7 @@ class AddressToLonLatGeocoder():
 
     def worker(self, job):
         with self.session as session:
-            query = geocoder.google(job, key='AIzaSyBj7xB2FVhT_UENj3-UBmeuagnV6oroYGk')
+            query = geocoder.google(job, key='') #ADD GOOGLE API, or CHANGE to different geocoder provider
 
         if query.ok:
             lon = query.latlng[1]
@@ -168,24 +168,3 @@ class AddressToLonLatGeocoder():
         # --- Save cache ---
         with open(os.path.join('data','geocoder','cache.pkl'), 'wb') as handle:
             pickle.dump(self.results_dict, handle)
-
-
-# # --- Load SAM Weather Files ---
-# dir_path = '/Applications/SAM.app/Contents/wind_resource/'
-# to_clean = os.listdir(dir_path)
-
-# # --- clean up name ---
-# jobs = [i.replace('.srw', '').replace('-', ' ')
-#         for i in to_clean if 'Ocean' not in i]
-# jobs = [i.replace('Rolling Hills', '').replace(
-#     'Flat Lands', '').replace('Lake', '')]
-
-# # --- replace acronym with full state name ---
-# jobs = ['United States ' +
-#     i.replace(i[0:2], str(us.states.lookup(i[0:2]))) for i in jobs]
-
-# # --- Initialize Geocoder ---
-# gc = AddressToLatLonGeocoder()
-# gc.run(jobs)
-
-# gc_lookup = gc.results_dict
