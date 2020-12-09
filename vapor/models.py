@@ -505,7 +505,7 @@ class GenericMerchantPlant():
         self.run_financial()
 
         if self.storage:
-            self.outputs = {**self.financial.Outputs.export(), **self.generator.Outputs.export(), **self.storage.Outputs.export()}
+            self.outputs = {**self.financial.Outputs.export(), **self.generator.Outputs.export(), **self.battery.Outputs.export()}
             self.outputs = {k:v for k,v in self.outputs.items() if isinstance(v, (str, float, int))}
             self.outputs['lifetime_gen_profile'] = np.array(self.battery.Outputs.pv_to_load) +\
                                                     np.array(self.battery.Outputs.batt_to_load) +\
