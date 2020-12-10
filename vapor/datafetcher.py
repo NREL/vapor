@@ -74,6 +74,7 @@ def load_cambium_data(aggregate_region,
                     'capacity_cost_busbar':'cambium_capacity_value',
                     'portfolio_cost_busbar':'cambium_portfolio_value',
                     'co2_rate_avg_gen':'cambium_co2_rate_avg',
+                    'co2_lrmer_enduse':'cambium_co2_rate_lrmer'
                         }
             c_df = c_df.rename(rename_cols, axis='columns')
 
@@ -87,6 +88,7 @@ def load_cambium_data(aggregate_region,
                          'cambium_capacity_value',
                          'cambium_portfolio_value',
                          'cambium_co2_rate_avg',
+                         'cambium_co2_rate_lrmer',
                          'cambium_grid_value',
                          'pca','timestamp']
             c_df = c_df[keep_cols]
@@ -94,7 +96,7 @@ def load_cambium_data(aggregate_region,
             # --- Wide to long ---
             c_df['timestamp'] = pd.to_datetime(c_df['timestamp'])
             c_df['year'] = [ts.year for ts in c_df['timestamp']]
-            c_df.sort_values('timestamp')
+            c_df.sort_values('timestamp', inplace=True)
             dfs.append(c_df)
                     
             # --- Make a copy with the subsequent odd year ---
