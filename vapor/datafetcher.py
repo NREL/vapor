@@ -144,6 +144,8 @@ def load_cambium_data(aggregate_region,
         
         # --- Map on region_hierarchy ---
         region_hierarchy = pd.read_csv(os.path.join('data','geography','region_hierarchy.csv'))
+        region_hierarchy.drop(columns = 'pca_res', inplace=True) # don't use pca_res, creates duplicated rows
+        region_hierarchy.drop_duplicates(inplace=True)
         scenario_df = scenario_df.merge(region_hierarchy, on='pca', how='left')
 
         regions_to_pickle = ['pca', 'rto', 'census_reg', 'state', 'inter']
