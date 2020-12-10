@@ -86,3 +86,31 @@ def test_optimize():
     )
 
     simulator.simulate()
+
+def test_optimize_lrmer():
+    grid = systemdesigner.BayesianSystemDesigner(
+                                        tech='pv',
+                                        re_capacity_mw=100,
+                                        batt_capacity_mw=0,
+                                        verbose=False
+                                    )
+    param_grid = grid.get_param_grid()
+
+    resource_file = 'data/PySAM Downloaded Weather Files/-89.578_39.394_psm3_60_tmy.csv'
+
+    cambium_df = load_cambium_data(aggregate_region='census_reg', scenario='StdScen20_MidCase')
+
+    vapor.config.BAYES_INIT_POINTS=2
+    vapor.config.BAYES_ITER=3
+
+    simulator = FixedCapacityMerchantPlant(
+        param_grid=param_grid,
+        tech='pv',
+        aggregate_region='census_reg',
+        region='MTN',
+        opt_var='cambium_co2_rate_lrmer',
+        resource_file=resource_file,
+        cambium_df = cambium_df
+    )
+
+    simulator.simulate()
