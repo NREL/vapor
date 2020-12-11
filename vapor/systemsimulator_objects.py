@@ -199,6 +199,7 @@ class BayesianSimulatorAddon():
 
         output['grid_value_per_mwh'] = output['lifetime_cambium_grid_value'] / output['lifetime_output_mwh']
         output['lifetime_cambium_co2_rate_avg_mwh'] = output['lifetime_cambium_co2_rate_avg'] / output['lifetime_output_mwh']
+        output['lifetime_cambium_co2_rate_lrmer_mwh'] = output['lifetime_cambium_co2_rate_lrmer'] / output['lifetime_output_mwh']
         return output
 
     def _worker_return_score(self, **kwargs):
