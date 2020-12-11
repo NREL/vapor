@@ -81,7 +81,7 @@ class Visualizer():
 
         MW_size = unit_df['system_capacity'] / 1000
 
-        if column in ['cambium_co2_rate_marg', 'cambium_co2_rate_avg', 'lifetime_cambium_co2_rate_marginal', 'lifetime_cambium_co2_rate_avg']:
+        if column in ['cambium_co2_rate_marg', 'cambium_co2_rate_avg', 'cambium_co2_rate_lrmer', 'lifetime_cambium_co2_rate_marginal', 'lifetime_cambium_co2_rate_avg', 'lifetime_cambium_co2_rate_lrmer']:
             self.units = 'Mil Tons'
             unit_df[column] = unit_df[column] / 1000000 #convert from kg/W to MT/MW
             self.suffix = 'Savings'
