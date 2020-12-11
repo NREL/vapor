@@ -3,7 +3,8 @@ pandas
 geopandas
 matplotlib
 seaborn
-nrel-pysam=2.1.5
+nrel-pysam==2.1.4
+nrel-pysam-stubs==2.1.4
 us
 geocoder
 bayesian-optimization
