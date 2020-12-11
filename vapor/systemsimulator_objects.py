@@ -170,7 +170,8 @@ class GenericSystemSimulator():
                                 'cambium_grid_value',
                                 'cambium_co2_rate_avg',
                                 'cambium_co2_rate_marg',
-                                'cambium_co2_rate_lrmer']:
+                                'cambium_co2_rate_lrmer',
+                                'lifetime_cambium_co2_rate_lrmer']:
             return True
         
         elif specific_opt_var in ['lcoe_real','lcoe_nom','marginal_cost_mwh', 'adjusted_installed_cost']:
