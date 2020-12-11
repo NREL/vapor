@@ -23,7 +23,7 @@ SLURM_MAX_DURATION = '06:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp'
 USER = 'tbowen'#'skoebric'
-SLURM_QOS = 'high'
+SLURM_QOS = 'normal'
 
 # --- Define Optimization Variables ---
 mode = 'regional'
