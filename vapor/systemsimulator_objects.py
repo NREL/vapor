@@ -24,7 +24,7 @@ import PySAM.Pvsamv1 as pv
 import PySAM.Windpower as wp
 import PySAM.Singleowner as so
 import PySAM.Merchantplant as mp
-import PySAM.Battery as stbt # see release notes for Version 2.2.0, Dec 2, 2020 ~ SAM 2020.11.29, SSC Version 250 @ https://pypi.org/project/NREL-PySAM/
+import PySAM.StandAloneBattery as stbt # see release notes for Version 2.2.0, Dec 2, 2020 ~ SAM 2020.11.29, SSC Version 250 @ https://pypi.org/project/NREL-PySAM/
 import PySAM.BatteryTools as bt
 
 import vapor.config as config
