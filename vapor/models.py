@@ -164,7 +164,7 @@ class Cambium():
         rev = rev[['cleared','value']]
 
         # --- create array of hourly lifetime inflation ---
-        if var in ['cambium_co2_rate_avg','cambium_co2_rate_marg']: inflation = None #no inflation on emissions
+        if var in ['cambium_co2_rate_avg','cambium_co2_rate_marg', 'cambium_co2_rate_lrmer']: inflation = None #no inflation on emissions
         if inflation != None:
             assert isinstance(inflation, float)
             annual_inf = (1 + inflation) ** np.arange(self.analysis_period)
