@@ -9,8 +9,8 @@ Created on Mon Feb  3 14:00:39 2020
 import os
 
 # --- API KEYS ---
-NREL_API_KEY = 'OJOhB72tEAwfSX6HF3AUpL6cEebh24cgdjbK7D1X'
-NREL_API_EMAIL = 'sam.koebrich@NREL.gov'
+NREL_API_KEY = 'ORchxEHd3f2DXVV8QWRJWRKpqzfD1jUqaBUnr845'#'OJOhB72tEAwfSX6HF3AUpL6cEebh24cgdjbK7D1X'
+NREL_API_EMAIL = 'thomas.bowen@NREL.gov'#'sam.koebrich@NREL.gov'
 
 # --- SCOPE / FINANCING ---
 LAST_YEAR = 2050 #run analysis through this year

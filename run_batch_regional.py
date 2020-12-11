@@ -22,7 +22,7 @@ SLURM_MIN_DURATION = '04:00:00'
 SLURM_MAX_DURATION = '06:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp'
-USER = 'skoebric'
+USER = 'tbowen'#'skoebric'
 SLURM_QOS = 'high'
 
 # --- Define Optimization Variables ---
