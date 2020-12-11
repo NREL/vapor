@@ -15,6 +15,7 @@ import ast
 
 import numpy as np
 import pandas as pd
+import math
 import geopandas as gpd
 import matplotlib.pyplot as plt
 from bayes_opt import BayesianOptimization, SequentialDomainReductionTransformer
@@ -377,6 +378,16 @@ class GenericMerchantPlant():
         self.battery.BatteryCell.batt_Cp = 1004
         self.battery.BatteryCell.batt_h_to_ambient = 500
         self.battery.BatteryCell.batt_room_temperature_celsius = np.full(8760, fill_value=20)
+
+        # new --- Thomas 20201211 --- BatteryTools >> battery_model_sizing >> size_battery kep throwing 
+        # errors about there not being a 'batt_computed_bank_capacity', this can be calculated based on 
+        # supplied values above and using formulas from BatteryTools >> calculate_battery_size >> size_from_strings
+        num_series = math.ceil(self.system_config['BatteryTools']['desired_voltage'] / self.battery.BatteryCell.batt_Vnom_default)
+        num_strings = math.ceil(self.system_config['BatteryTools']['desired_capacity'] * 1000 / (self.battery.BatteryCell.batt_Qfull * self.battery.BatteryCell.batt_Vnom_default * num_series))
+        computed_voltage = self.battery.BatteryCell.batt_Vnom_default * num_series
+        self.battery.BatterySystem.batt_computed_bank_capacity = self.battery.BatteryCell.batt_Qfull * computed_voltage * num_strings * 0.001
+        del num_series, num_strings, computed_voltage
+        # original continued
         self._size_battery()
         self.battery.execute()
 
