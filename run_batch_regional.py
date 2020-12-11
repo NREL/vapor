@@ -28,10 +28,10 @@ SLURM_QOS = 'high'
 # --- Define Optimization Variables ---
 mode = 'regional'
 aggregate_region = 'pca'
-opt_vars = ['lifetime_cambium_co2_rate_avg'] #['project_return_aftertax_npv']
+opt_vars = ['lifetime_cambium_co2_rate_lrmer'] #['lifetime_cambium_co2_rate_avg'] #['project_return_aftertax_npv']
 scenarios = ['StdScen20_HighRECost', 'StdScen20_LowRECost', 'StdScen20_MidCase']
 techs = ['pv', 'wind']
-batt_sizes = [0, 25, 100]
+batt_sizes = [0]#[0, 25, 100]
 batt_durations = [4]
 
 def write_bash(opt_var, scenario, tech, batt_size, batt_duration):
