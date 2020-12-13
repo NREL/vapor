@@ -21,7 +21,7 @@ SLURM_ACCOUNT = 'vapor'
 SLURM_MIN_DURATION = '04:00:00'
 SLURM_MAX_DURATION = '06:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
-CONDA_ENV = 'vp'
+CONDA_ENV = 'vp_oldsam'#'vp'
 USER = 'tbowen'#'skoebric'
 SLURM_QOS = 'normal'
 
