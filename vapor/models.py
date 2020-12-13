@@ -387,6 +387,9 @@ class GenericMerchantPlant():
         computed_voltage = self.battery.BatteryCell.batt_Vnom_default * num_series
         self.battery.BatterySystem.batt_computed_bank_capacity = self.battery.BatteryCell.batt_Qfull * computed_voltage * num_strings * 0.001
         del num_series, num_strings, computed_voltage
+        # new error spawned up after implementing change (may be based on the fact that the 
+        # code simply progressed further)
+        self.battery.BatterySystem.batt_cycle_cost_choice = 0 # Use SAM cost model for degradaton penalty or input custom via batt_cycle_cost. Options: 0=UseCostModel,1=InputCost
         # original continued
         self._size_battery()
         self.battery.execute()
