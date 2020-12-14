@@ -118,27 +118,29 @@ def load_cambium_data(aggregate_region,
                 valid_df['year'] = [ts.year + 1 for ts in valid_df['timestamp']]
                 valid_df['timestamp'] = [ts.replace(year=ts.year+1) for ts in valid_df['timestamp']]
                 scenario_df = pd.concat([scenario_df, valid_df], axis='rows')
-
-        # --- year-over-year change for long run marginal emissions rate ---
+        
+        # --- hourly annualized long run marginal emissions rate ---
         # based on conversations with Pieter, should not take direct lrmer value
         # see documentation, "Calculating Long-Run Marginal Emission Rates"
-        # particularly see footnote that starts with "We calculate the LRMER in 2-year steps..."
+        # particularly see footnote that starts with "We calculate the LRMER in 2-year steps..." 
+        # grab copy, grab hour, day, month independent of year
         scenario_df_lrmer = scenario_df.copy()[['year', 'timestamp', 'pca', 'cambium_co2_rate_lrmer']] #copy
-        pca_list = list(set(scenario_df_lrmer.pca)) # grab list of unique pcas in list
-        # get each pca to be column (makes it easier to take difference as opposed to relying on a groupby)
-        scenario_df_lrmer = scenario_df_lrmer.pivot(index=['timestamp', 'year'], columns = 'pca', values = 'cambium_co2_rate_lrmer')
-        scenario_df_lrmer.reset_index(inplace=True)
-        # grab a month, day, hour timestamp that is independent of year
         scenario_df_lrmer[['month', 'day', 'hour']] = pd.DataFrame({'month': scenario_df_lrmer.timestamp.dt.month, 'day':scenario_df_lrmer.timestamp.dt.day, 'hour':scenario_df_lrmer.timestamp.dt.hour})
         scenario_df_lrmer.sort_values(['month', 'day', 'hour', 'year'], inplace=True)
-        # take difference for each pca, by year holding hours, days, months constant across years
-        scenario_df_lrmer[pca_list] = scenario_df_lrmer[pca_list].diff().fillna(0)
-        # shape back to long format, sort by pca and timestamp, merge back and delete copy
-        scenario_df_lrmer = pd.melt(scenario_df_lrmer, id_vars = ['year', 'timestamp'], value_vars=pca_list, value_name='cambium_co2_rate_lrmer')
+        # only take averages for years within lifetime of investment
+        year_range = range(scenario_df_lrmer.year.min(), (scenario_df_lrmer.year.min() + config.SYSTEM_LIFETIME),1)
+        scenario_df_lrmer_focus = scenario_df_lrmer.loc[scenario_df_lrmer.year.isin(year_range),:]
+        scenario_df_lrmer_focus = scenario_df_lrmer_focus.groupby(['pca', 'month','day','hour'],as_index=False)['cambium_co2_rate_lrmer'].mean()
+        # merge back together, overwrite values with average for years in investment's lifetime, keep originals for those beyond
+        scenario_df_lrmer_focus = pd.merge(scenario_df_lrmer.loc[scenario_df_lrmer.year.isin(year_range),:].drop(columns='cambium_co2_rate_lrmer'), scenario_df_lrmer_focus, on =['pca', 'month','day','hour'], suffixes=('_orig','_avg'),how='inner')
+        scenario_df_lrmer = scenario_df_lrmer_focus.append(scenario_df_lrmer.loc[~scenario_df_lrmer.year.isin(year_range),], ignore_index=True)
+        # resort and reindex and drop extra columns and merge into original dataframe
         scenario_df_lrmer.sort_values(['pca', 'timestamp'], inplace=True)
+        scenario_df_lrmer.reset_index(drop=True, inplace=True)
+        scenario_df_lrmer.drop(['month', 'day', 'hour'], inplace=True)
         scenario_df = scenario_df.drop(columns='cambium_co2_rate_lrmer').merge(scenario_df_lrmer, on=['year','timestamp','pca'])
-        del scenario_df_lrmer, pca_list
-        
+        del scenario_df_lrmer, scenario_df_lrmer_focus, year_range
+              
         # --- Clear Memory ---
         scenario_df = helper.memory_downcaster(scenario_df)
         
