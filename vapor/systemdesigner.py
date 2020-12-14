@@ -54,7 +54,7 @@ class BayesianSystemDesigner():
 
         if isinstance(re_capacity_mw, (float, int)):
             self.re_capacity_kw=re_capacity_mw * 1000  # pysam takes this as kw
-        elif isinstance(batt_capacity_mw, (tuple, list)):
+        elif isinstance(re_capacity_mw, (tuple, list)):
             self.re_capacity_kw = (re_capacity_mw[0] * 1000, re_capacity_mw[1] * 1000)
         
         if isinstance(batt_capacity_mw, (float, int)):
