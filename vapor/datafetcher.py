@@ -119,25 +119,33 @@ def load_cambium_data(aggregate_region,
                 valid_df['timestamp'] = [ts.replace(year=ts.year+1) for ts in valid_df['timestamp']]
                 scenario_df = pd.concat([scenario_df, valid_df], axis='rows')
         
-        # --- hourly annualized long run marginal emissions rate ---
+        log.info(f'....beginning to calculate hourly lrmer values over system lifetime ({config.SYSTEM_LIFETIME})')
+        # --- hourly levelized long run marginal emissions rate ---
         # based on conversations with Pieter, should not take direct lrmer value
         # see documentation, "Calculating Long-Run Marginal Emission Rates"
         # particularly see footnote that starts with "We calculate the LRMER in 2-year steps..." 
-        # grab copy, grab hour, day, month independent of year
+        # grab copy
         scenario_df_lrmer = scenario_df.copy()[['year', 'timestamp', 'pca', 'cambium_co2_rate_lrmer']] #copy
+        # levelize values using starting year as start point
+        scenario_df_lrmer['present_value_factor'] = 1/((1+config.DISCOUNT_RATE)**(scenario_df_lrmer['year'] - scenario_df_lrmer.year.min()))
+        scenario_df_lrmer['cambium_co2_rate_lrmer_norm'] = scenario_df_lrmer['present_value_factor']*scenario_df_lrmer['cambium_co2_rate_lrmer']
+        # grab hour, day, month independent of year
         scenario_df_lrmer[['month', 'day', 'hour']] = pd.DataFrame({'month': scenario_df_lrmer.timestamp.dt.month, 'day':scenario_df_lrmer.timestamp.dt.day, 'hour':scenario_df_lrmer.timestamp.dt.hour})
         scenario_df_lrmer.sort_values(['month', 'day', 'hour', 'year'], inplace=True)
-        # only take averages for years within lifetime of investment
+        # only take levelized values for years within lifetime of investment
         year_range = range(scenario_df_lrmer.year.min(), (scenario_df_lrmer.year.min() + config.SYSTEM_LIFETIME),1)
         scenario_df_lrmer_focus = scenario_df_lrmer.loc[scenario_df_lrmer.year.isin(year_range),:]
-        scenario_df_lrmer_focus = scenario_df_lrmer_focus.groupby(['pca', 'month','day','hour'],as_index=False)['cambium_co2_rate_lrmer'].mean()
+        scenario_df_lrmer_focus = scenario_df_lrmer_focus.groupby(['pca', 'month','day','hour'],as_index=False)[['cambium_co2_rate_lrmer_norm', 'present_value_factor']].sum()
+        scenario_df_lrmer_focus['cambium_co2_rate_lrmer'] = scenario_df_lrmer_focus['cambium_co2_rate_lrmer_norm']/scenario_df_lrmer_focus['present_value_factor']
+        scenario_df_lrmer_focus.drop(columns=['cambium_co2_rate_lrmer_norm', 'present_value_factor'], inplace=True)
+        scenario_df_lrmer.drop(columns=['cambium_co2_rate_lrmer_norm', 'present_value_factor'], inplace=True)
         # merge back together, overwrite values with average for years in investment's lifetime, keep originals for those beyond
-        scenario_df_lrmer_focus = pd.merge(scenario_df_lrmer.loc[scenario_df_lrmer.year.isin(year_range),:].drop(columns='cambium_co2_rate_lrmer'), scenario_df_lrmer_focus, on =['pca', 'month','day','hour'], suffixes=('_orig','_avg'),how='inner')
+        scenario_df_lrmer_focus = pd.merge(scenario_df_lrmer.loc[scenario_df_lrmer.year.isin(year_range),:].drop(columns=['cambium_co2_rate_lrmer']), scenario_df_lrmer_focus, on =['pca', 'month','day','hour'], suffixes=('_orig','_avg'),how='inner')
         scenario_df_lrmer = scenario_df_lrmer_focus.append(scenario_df_lrmer.loc[~scenario_df_lrmer.year.isin(year_range),], ignore_index=True)
         # resort and reindex and drop extra columns and merge into original dataframe
         scenario_df_lrmer.sort_values(['pca', 'timestamp'], inplace=True)
         scenario_df_lrmer.reset_index(drop=True, inplace=True)
-        scenario_df_lrmer.drop(['month', 'day', 'hour'], inplace=True)
+        scenario_df_lrmer.drop(columns=['month', 'day', 'hour'], inplace=True)
         scenario_df = scenario_df.drop(columns='cambium_co2_rate_lrmer').merge(scenario_df_lrmer, on=['year','timestamp','pca'])
         del scenario_df_lrmer, scenario_df_lrmer_focus, year_range
               
@@ -149,7 +157,6 @@ def load_cambium_data(aggregate_region,
         region_hierarchy.drop(columns = 'pca_res', inplace=True) # don't use pca_res, creates duplicated rows
         region_hierarchy.drop_duplicates(inplace=True)
         scenario_df = scenario_df.merge(region_hierarchy, on='pca', how='left')
-
         regions_to_pickle = ['pca', 'rto', 'census_reg', 'state', 'inter']
         regions_to_pickle.append(regions_to_pickle.pop(regions_to_pickle.index(aggregate_region))) #move selected region to end of list so we deal with it last and can return
         log.info(f'....saving pickles for {regions_to_pickle}')
