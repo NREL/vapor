@@ -175,8 +175,8 @@ class GenericSystemSimulator():
                                   'marginal_cost_mwh', 'adjusted_installed_cost',
                                   'cambium_co2_rate_avg',
                                   'cambium_co2_rate_marg',
-                                  'cambium_co2_rate_lrmer',
-                                  'lifetime_cambium_co2_rate_lrmer']:
+                                  'cambium_co2_rate_lrmer']#,
+                                #   'lifetime_cambium_co2_rate_lrmer']:
             return False
         
         else:
