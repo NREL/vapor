@@ -53,7 +53,7 @@ def existing(scenario, tech, aggregate_region, batt_size, batt_duration, opt_var
 
     # --- Save ---
     best = plumbing.best_systems
-    best.to_pickle(os.path.join('results', 'bnef_results.pkl'))
+    best.to_pickle(os.path.join('results', 'bnef_results_newtb.pkl'))
 
 def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
     log.info(f"Working on constraint run for {scenario}, {tech} with {goal_pct} {goal_type}")
