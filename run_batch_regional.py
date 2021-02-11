@@ -23,12 +23,12 @@ SLURM_MAX_DURATION = '06:00:00'
 SLURM_OUTPUT_DIR = 'slurm_out/%j.out'
 CONDA_ENV = 'vp_oldsam'#'vp'
 USER = 'tbowen'#'skoebric'
-SLURM_QOS = 'normal'
+SLURM_QOS = 'high'#'normal'
 
 # --- Define Optimization Variables ---
 mode = 'regional'
 aggregate_region = 'pca'
-opt_vars = ['lifetime_cambium_co2_rate_lrmer'] #['lifetime_cambium_co2_rate_avg'] #['project_return_aftertax_npv']
+opt_vars = ['project_return_aftertax_npv'] # ['lifetime_cambium_co2_rate_lrmer'] #['lifetime_cambium_co2_rate_avg'] #['project_return_aftertax_npv']
 scenarios = ['StdScen20_HighRECost', 'StdScen20_LowRECost', 'StdScen20_MidCase']
 techs = ['pv', 'wind']
 batt_sizes = [0, 25, 100]
