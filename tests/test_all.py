@@ -134,5 +134,3 @@ def test_storage_unit():
     model.make_gen_profile_no_batt() #8760 * analysis period of generation without battery
     if model.storage: 
         model.run_battery()
-    print(model.storage)
-    # print(f"PV no storage, irr {model.outputs['project_return_aftertax_irr']}, npv {model.outputs['project_return_aftertax_npv']}")
