@@ -101,7 +101,11 @@ class GenericSystemSimulator():
             generation = eval(generation)
 
         # --- convert generation to numpy array ---
-        generation = np.array(generation) / 1000  # kW to MWh
+        # NOTE: the commented out code below was causing issues in original values; essentially the 
+        # "self.cambium.calc_cambium_lifetime_product(generation, var)" in the for loop calls
+        # "self.calc_cambium_lifetime_rev(gen, var)" within models, which _also_ scales the values by 1,000
+        # in essence we were double scaling some values
+        # generation = np.array(generation) / 1000  # kW to MWh  
         generation = generation[:, np.newaxis] #wide to tall
 
         outputs = {}
