@@ -37,9 +37,9 @@ tech_dict = {'pv':nrel_color_dict[4],
 batt_size_dict = {0:'o', 25:'P', 100:'^'}
 
 scen_label_dict = {
-    'StdScen20_LowRECost':'Low Wholesale Cost',
-    'StdScen20_MidCase':'Baseline Cost',
-    'StdScen20_HighRECost':'High Wholesale Cost'}
+    'StdScen20_LowRECost':'Low Cost',
+    'StdScen20_MidCase':'Mid Cost',
+    'StdScen20_HighRECost':'High Cost'}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~ VISUALIZATION OF OUTPUT ~~~~~~~~~~~~~~~~~~~~~
@@ -83,7 +83,7 @@ class Visualizer():
 
         if column in ['cambium_co2_rate_marg', 'cambium_co2_rate_avg', 'cambium_co2_rate_lrmer', 'lifetime_cambium_co2_rate_marginal', 'lifetime_cambium_co2_rate_avg', 'lifetime_cambium_co2_rate_lrmer']:
             self.units = 'Mil Tons'
-            unit_df[column] = unit_df[column] / 1000000 #convert from kg/W to MT/MW
+            unit_df[column] = unit_df[column] / 1000000 #convert from kg/W to MT/MW # IS THIS CORRECT? TODO: check this!
             self.suffix = 'Savings'
         
         elif column in ['lcoe_real','lcoe_nom', 'lppa_nom', 'lppa_real','ppa']:
@@ -226,7 +226,7 @@ class Visualizer():
             
             for _, row in plot_df.iterrows():
                 if row['area_pct'] > self.region_label_pct:
-                    ax.annotate(text=f"{round(row[column], 1):,}",
+                    ax.annotate(text=f"{int(round(row[column], 0)):,}",
                                 xy=row['geometry'].centroid.coords[0],
                                 horizontalalignment='center',
                                 size=7)
@@ -278,7 +278,7 @@ class Visualizer():
                 
                 for _, row in scenario_df.iterrows():
                     if row['area_pct'] > self.region_label_pct:
-                        axs[i].annotate(text=f"{round(row[column], 1):,}",
+                        axs[i].annotate(text=f"{int(round(row[column], 0)):,}",
                                     xy=row['geometry'].centroid.coords[0],
                                     horizontalalignment='center',
                                     size=7)
