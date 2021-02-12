@@ -20,6 +20,7 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 from shapely.geometry import Point
+from shapely.ops import cascaded_union
 
 # import PySAM.Pvsamv1 as pv
 import PySAM.Pvwattsv7 as pv
@@ -461,6 +462,155 @@ class GetCentroidOfRegions():
 
 
 class CoordsToRegionCentroid(GetCentroidOfRegions):
+
+    def match_centroids(self, df):
+        """For each lon/lat pair in a dataframe, get the resource region file path."""
+
+        # --- create centroids lookup ---
+        self.find_centroids()
+
+        # --- convert points iterable to geopandas dataframe ---
+        df['geometry'] = [Point(row['longitude'], row['latitude']) for _, row in df.iterrows()]
+        points_gdf = gpd.GeoDataFrame(df)
+        points_gdf.crs = "EPSG:4326"  
+
+        # --- find aggregate region for each point ---
+        points_gdf = gpd.sjoin(points_gdf, self.region_shape, how='left', op='within')
+
+        # --- map on resource region point ---
+        points_gdf['resource_point'] = points_gdf['region'].map(self.centroids_lookup)
+
+        resource_points_dict = {}
+        for tech in points_gdf['tech'].unique():
+            gdf_subset = points_gdf.loc[points_gdf['tech'] == tech]
+            resource_points_to_fetch = list(set(gdf_subset['resource_point']))
+            if np.nan in resource_points_to_fetch:
+                resource_points_to_fetch.remove(np.nan)
+            fetcher = FetchResourceFiles(tech=tech)
+            fetcher.fetch(resource_points_to_fetch)
+            points_gdf.loc[points_gdf['tech'] == tech, 'resource_fp'] = points_gdf.loc[points_gdf['tech']
+                                                                                       == tech, 'resource_point'].map(fetcher.resource_file_paths_dict)
+
+        # --- drop nulls ---
+        points_gdf = points_gdf.dropna(subset=['resource_fp','resource_point'])
+        return points_gdf
+
+class GetBestOfRegions():
+
+    """
+    Based on stakeholder feedback, using the centroid of a given region was not likely to imitate the actual placement
+    of future wind and solar PV plants. A better approximation would be to pick the 'best' region based on a simple
+    measure, such as the annual capacity factor. This approach *_does not_* attempt to quantify siting exclusions,
+    distance to transmission infrastructure, or presence of existing generators that would complicate the analysis
+
+    Might be useful to allow a set point where you would pick not the 'best' but at the 90th percentile as a concession
+    that the best resources are likely already being exploited in many regions.
+    """
+
+    def __init__(self,
+                 aggregate_region='pca_res',
+                 shapefile_path=None,
+                 min_points = 5, spacing=0.5):
+        """Get a centroid for each region of a given aggregate_region across the U.S."""
+
+        assert aggregate_region in ['pca', 'pca_res', 'rto', 'census_reg', 'state', 'inter']
+        self.aggregate_region = aggregate_region
+        self.shapefile_path = shapefile_path
+        self.min_sample = min_points
+        self.arc_spacing_sample = spacing
+
+
+    def _load_shapefile(self):
+        """Load shapefiles, if no path is specified, the ReEDS Wind Region file will be used."""
+        if self.shapefile_path == None:
+            self.shapefile_path = os.path.join('data','geography', 'ReEDS_Resource_Regions.shp')
+        assert os.path.isfile(self.shapefile_path)
+
+        gdf = gpd.read_file(self.shapefile_path)
+        gdf = gdf.to_crs("EPSG:4326")
+        return gdf
+
+    def _aggregate_shapefile(self, gdf):
+        gdf = gdf.dissolve(by=self.aggregate_region)
+        gdf.reset_index(inplace=True)
+        return gdf
+
+    def _random_points_within(self, poly):
+        
+        random_set_seed = random.Random(1000) # for reproducibility, should return same value for same bounds (i.e., continental U.S. or a pca)
+        min_x, min_y, max_x, max_y = poly.bounds
+
+        points = []
+
+        while len(points) < self.min_sample:
+            random_point = Point([random_set_seed.uniform(min_x, max_x), random_set_seed.uniform(min_y, max_y)])
+            if (random_point.within(poly)):
+                points.append(random_point)
+
+        return points
+
+    def _generate_grid_in_polygon(self, gdf):
+        ''' This Function generates evenly spaced points within the given GeoDataFrame.
+            The parameter 'spacing' defines the distance between the points in coordinate units. '''
+        
+        assert self.aggregate_region in gdf.columns, "agg_col not in geodataframe columns"
+        poly_in = gdf.dissolve(by = [self.aggregate_region]).reset_index()
+        
+        gdfs = []
+        for i in poly_in[self.aggregate_region].unique():
+            
+            # Convert the GeoDataFrame to a single polygon
+            poly_in_foc = cascaded_union([poly for poly in poly_in.loc[poly_in[self.aggregate_region] == i].geometry])
+
+            # Get the bounds of the polygon
+            minx, miny, maxx, maxy = poly_in_foc.bounds    
+
+            # Now generate the entire grid
+            x_coords = list(np.arange(np.floor(minx), int(np.ceil(maxx)), self.arc_spacing_sample))
+            y_coords = list(np.arange(np.floor(miny), int(np.ceil(maxy)), self.arc_spacing_sample))
+
+            grid = [Point(x) for x in zip(np.meshgrid(x_coords, y_coords)[0].flatten(),
+                                        np.meshgrid(x_coords, y_coords)[1].flatten())]
+
+            # Finally only keep the points within the polygon
+            list_of_points = [point for point in grid if point.within(poly_in_foc)]
+            
+            if len(list_of_points) < self.min_sample:
+                list_of_points = self._random_points_within(poly_in_foc)
+            
+            gdf_i = gpd.GeoDataFrame(pd.DataFrame({f"{self.aggregate_region}": np.repeat([i], repeats = len(list_of_points))}),\
+                                    geometry=list_of_points)
+            
+            gdfs.append(gdf_i)
+        
+        self.point_sample = pd.concat(gdfs)
+
+        return self
+
+    def _make_best_lookup(self):
+        """Returns 'lat' and 'lon' columns for cetroid for each region."""
+
+        self.point_sample['lon'] = self.point_sample.geometry.x.round(3)
+        self.point_sample['lat'] = self.point_sample.geometry.y.round(3)
+        self.point_sample.reset_index(inplace=True)
+
+        # --- create dict with tuple lookups ---
+        self.point_sample['point'] = [(row['lon'], row['lat']) for _, row in self.point_sample.iterrows()]
+        # self.best_lookup = dict(zip(self.point_sample[self.aggregate_region], self.point_sample['point'])) # only returns one for each aggregate region
+
+        # --- rename shapefile ---
+        self.region_shape = self.point_sample[[self.aggregate_region,'geometry']]
+        self.region_shape.columns = ['region','geometry']
+
+        return self 
+    
+    # def find_centroids(self):
+    #     gdf = self._load_shapefile()
+    #     gdf = self._aggregate_shapefile(gdf)
+    #     self._make_centroids_lookup(gdf)
+
+
+class CoordsToRegionBest(GetBestOfRegions):
 
     def match_centroids(self, df):
         """For each lon/lat pair in a dataframe, get the resource region file path."""
