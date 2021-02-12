@@ -380,33 +380,8 @@ class GenericMerchantPlant():
         self.battery.BatteryCell.batt_h_to_ambient = 500
         self.battery.BatteryCell.batt_room_temperature_celsius = np.full(8760, fill_value=20)
 
-        # new --- Thomas 20201211 --- BatteryTools >> battery_model_sizing >> size_battery kep throwing 
-        # errors about there not being a 'batt_computed_bank_capacity', this can be calculated based on 
-        # supplied values above and using formulas from BatteryTools >> calculate_battery_size >> size_from_strings
-        num_series = math.ceil(self.system_config['BatteryTools']['desired_voltage'] / self.battery.BatteryCell.batt_Vnom_default)
-        num_strings = math.ceil(self.system_config['BatteryTools']['desired_capacity'] * 1000 / (self.battery.BatteryCell.batt_Qfull * self.battery.BatteryCell.batt_Vnom_default * num_series))
-        computed_voltage = self.battery.BatteryCell.batt_Vnom_default * num_series
-        self.battery.BatterySystem.batt_computed_bank_capacity = self.battery.BatteryCell.batt_Qfull * computed_voltage * num_strings * 0.001
-        del num_series, num_strings, computed_voltage
-        # new error spawned up after implementing change (may be based on the fact that the 
-        # code simply progressed further)
-        self.battery.BatterySystem.batt_cycle_cost_choice = 0 # Use SAM cost model for degradaton penalty or input custom via batt_cycle_cost. Options: 0=UseCostModel,1=InputCost
-        # original continued
         self._size_battery()
         self.battery.execute()
-
-        # ts = pd.DataFrame({
-        #     'batt_to_load':self.battery.Outputs.batt_to_load[0:8760],
-        #     'pv_to_load':self.battery.Outputs.pv_to_load[0:8760],
-        #     'grid_to_load':self.battery.Outputs.grid_to_load[0:8760],
-        #     'pv_to_grid':self.battery.Outputs.pv_to_grid[0:8760],
-        #     'pv_to_batt':self.battery.Outputs.pv_to_batt[0:8760],
-        #     'batt_SOC':self.battery.Outputs.batt_SOC[0:8760],
-        #     'load':self.load.as_array()
-        # })
-        # ts['total_RE'] = ts['batt_to_load'] + ts['pv_to_load']
-        # ts['pct_RE'] = ts['total_RE'] / ts['load']
-        # ts.to_csv('ts.csv')
     
     def run_financial(self):
             # FinancialParamters, SystemCosts, TaxCreditIncentives, Depreciation, PaymentIncentives, Revenue, batterySystem, SystemOutput, UtilityBill, Lifetime, FuelCell, Capacity Payments, GridLimits
