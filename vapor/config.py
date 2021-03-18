@@ -48,3 +48,5 @@ RESOURCE_INTERVAL_MIN = 60 #minutes
 PROCESS_WORKERS = 8#int(os.cpu_count() / 2)
 THREAD_WORKERS = 8#int(os.cpu_count() / 2)
 
+# --- RESOURCE SAMPLING --- # NEW: THOMAS BOWEN 03182021
+SAMPLING_BEST = True # will choose to pick the 'best' resource site in a region rather than the centroid of that region
