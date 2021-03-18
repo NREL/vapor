@@ -67,7 +67,44 @@ class RegionalPipeline():
     def setup(self):
 
         # --- Get Resource Files for Region ---
-        if self.resource_file_dict == None:
+        if config.SAMPLING_BEST:
+            
+            # --- Get lookup of centroids ---
+            BestLookup = datafetcher.GetBestOfRegions(aggregate_region=self.aggregate_region, tech=self.tech)
+            BestLookup.find_best()
+            self.centroids_dict = BestLookup.centroids_lookup
+            self.geometry = BestLookup.region_shape
+
+            fetcher = datafetcher.FetchResourceFiles(tech=self.tech)
+
+            # --- fetch resource data for lat/lon tuples ---
+            fetcher.fetch(self.centroids_dict.values())
+
+            # --- convert tuples dict to aggregate region dict ---
+            tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path 
+            self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
+
+            if any(~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())):
+
+                # --- Get lookup of centroids ---
+                CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
+                CentroidsLookup.find_centroids()
+                temp_centroids_dict = CentroidsLookup.centroids_lookup
+
+                missing_regions = BestLookup.region_shape['region'][~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())]
+                temp_centroids_dict = {i: temp_centroids_dict[i] for i in missing_regions}
+
+                fetcher_temp = datafetcher.FetchResourceFiles(tech=self.tech)
+
+                # --- fetch resource data for lat/lon tuples ---
+                fetcher_temp.fetch(temp_centroids_dict.values()) 
+
+                # --- convert tuples dict to aggregate region dict ---
+                tuple_dict_temp = fetcher_temp.resource_file_paths_dict #keys=region, values=centroid resource file path
+                resource_file_dict_temp = {k:tuple_dict_temp[v] for k,v in temp_centroids_dict.items()}
+                self.resource_file_dict.update(resource_file_dict_temp)              
+        
+        else: 
 
             # --- Get lookup of centroids ---
             CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
@@ -300,20 +337,59 @@ class GoalPipeline():
         # --- Get Resource Files for Region ---
         if self.resource_file_dict == None:
 
-            # --- Get lookup of centroids ---
-            CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
-            CentroidsLookup.find_centroids()
-            self.centroids_dict = CentroidsLookup.centroids_lookup
-            self.geometry = CentroidsLookup.region_shape
+            if config.SAMPLING_BEST:
+                
+                # --- Get lookup of centroids ---
+                BestLookup = datafetcher.GetBestOfRegions(aggregate_region=self.aggregate_region, tech=self.tech)
+                BestLookup.find_best()
+                self.centroids_dict = BestLookup.centroids_lookup
+                self.geometry = BestLookup.region_shape
+
+                fetcher = datafetcher.FetchResourceFiles(tech=self.tech)
+
+                # --- fetch resource data for lat/lon tuples ---
+                fetcher.fetch(self.centroids_dict.values())
+
+                # --- convert tuples dict to aggregate region dict ---
+                tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path 
+                self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
+
+                if any(~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())):
+
+                    # --- Get lookup of centroids ---
+                    CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
+                    CentroidsLookup.find_centroids()
+                    temp_centroids_dict = CentroidsLookup.centroids_lookup
+
+                    missing_regions = BestLookup.region_shape['region'][~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())]
+                    temp_centroids_dict = {i: temp_centroids_dict[i] for i in missing_regions}
+
+                    fetcher_temp = datafetcher.FetchResourceFiles(tech=self.tech)
+
+                    # --- fetch resource data for lat/lon tuples ---
+                    fetcher_temp.fetch(temp_centroids_dict.values()) 
+
+                    # --- convert tuples dict to aggregate region dict ---
+                    tuple_dict_temp = fetcher_temp.resource_file_paths_dict #keys=region, values=centroid resource file path
+                    resource_file_dict_temp = {k:tuple_dict_temp[v] for k,v in temp_centroids_dict.items()}
+                    self.resource_file_dict.update(resource_file_dict_temp)              
             
-            fetcher = datafetcher.FetchResourceFiles(tech=self.tech)
+            else: 
 
-            # --- fetch resource data for lat/lon tuples ---
-            fetcher.fetch(self.centroids_dict.values()) 
+                # --- Get lookup of centroids ---
+                CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
+                CentroidsLookup.find_centroids()
+                self.centroids_dict = CentroidsLookup.centroids_lookup
+                self.geometry = CentroidsLookup.region_shape
+                
+                fetcher = datafetcher.FetchResourceFiles(tech=self.tech)
 
-            # --- convert tuples dict to aggregate region dict ---
-            tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path
-            self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
+                # --- fetch resource data for lat/lon tuples ---
+                fetcher.fetch(self.centroids_dict.values()) 
+
+                # --- convert tuples dict to aggregate region dict ---
+                tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path
+                self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
 
         # --- Load Cambium Data ---
         if not isinstance(self.cambium_df, pd.DataFrame):
