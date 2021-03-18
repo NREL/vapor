@@ -69,7 +69,7 @@ class RegionalPipeline():
         # --- Get Resource Files for Region ---
         if config.SAMPLING_BEST:
             
-            # --- Get lookup of centroids ---
+            # --- Get lookup of best regions ---
             BestLookup = datafetcher.GetBestOfRegions(aggregate_region=self.aggregate_region, tech=self.tech)
             BestLookup.find_best()
             self.centroids_dict = BestLookup.centroids_lookup
@@ -84,14 +84,16 @@ class RegionalPipeline():
             tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path 
             self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
 
+            # if any regions are missing values, pull values from centroids instead
             if any(~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())):
-
+                
                 # --- Get lookup of centroids ---
                 CentroidsLookup = datafetcher.GetCentroidOfRegions(aggregate_region=self.aggregate_region)
                 CentroidsLookup.find_centroids()
                 temp_centroids_dict = CentroidsLookup.centroids_lookup
 
                 missing_regions = BestLookup.region_shape['region'][~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())]
+                log.info("missing data for select regions ({missing_regions})")
                 temp_centroids_dict = {i: temp_centroids_dict[i] for i in missing_regions}
 
                 fetcher_temp = datafetcher.FetchResourceFiles(tech=self.tech)
@@ -102,7 +104,17 @@ class RegionalPipeline():
                 # --- convert tuples dict to aggregate region dict ---
                 tuple_dict_temp = fetcher_temp.resource_file_paths_dict #keys=region, values=centroid resource file path
                 resource_file_dict_temp = {k:tuple_dict_temp[v] for k,v in temp_centroids_dict.items()}
-                self.resource_file_dict.update(resource_file_dict_temp)              
+                self.resource_file_dict.update(resource_file_dict_temp)
+
+                # alter BestLookup.best_ranking_df to be saved for analyzing / visualizing results
+                missing_regions = pd.DataFrame({"region": missing_regions, "point": list(temp_centroids_dict.values()), "tech": self.tech})
+                missing_regions['lon'] = missing_regions.point.apply(lambda x: x[1])
+                missing_regions['lat'] = missing_regions.point.apply(lambda x: x[0])
+                missing_regions.rename(columns = {'region': self.aggregate_region}, inplace=True)
+
+                BestLookup.best_ranking_df = pd.concat([BestLookup.best_ranking_df, missing_regions])
+                
+            BestLookup.best_ranking_df.drop(columns="geometry").to_csv(os.path.join("data", "reV_resource_supply_curves", f"best_supply_curve_{self.aggregate_region}_{self.tech}.csv"))               
         
         else: 
 
@@ -339,7 +351,7 @@ class GoalPipeline():
 
             if config.SAMPLING_BEST:
                 
-                # --- Get lookup of centroids ---
+                # --- Get lookup of best in region ---
                 BestLookup = datafetcher.GetBestOfRegions(aggregate_region=self.aggregate_region, tech=self.tech)
                 BestLookup.find_best()
                 self.centroids_dict = BestLookup.centroids_lookup
@@ -354,6 +366,7 @@ class GoalPipeline():
                 tuple_dict = fetcher.resource_file_paths_dict #keys=region, values=centroid resource file path 
                 self.resource_file_dict = {k:tuple_dict[v] for k,v in self.centroids_dict.items()}
 
+                # if any regions are missing values, pull values from centroids instead
                 if any(~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())):
 
                     # --- Get lookup of centroids ---
@@ -362,6 +375,8 @@ class GoalPipeline():
                     temp_centroids_dict = CentroidsLookup.centroids_lookup
 
                     missing_regions = BestLookup.region_shape['region'][~BestLookup.region_shape['region'].isin(self.resource_file_dict.keys())]
+
+                    log.info(f'missing data for select regions: {missing_regions}')
                     temp_centroids_dict = {i: temp_centroids_dict[i] for i in missing_regions}
 
                     fetcher_temp = datafetcher.FetchResourceFiles(tech=self.tech)
@@ -372,8 +387,18 @@ class GoalPipeline():
                     # --- convert tuples dict to aggregate region dict ---
                     tuple_dict_temp = fetcher_temp.resource_file_paths_dict #keys=region, values=centroid resource file path
                     resource_file_dict_temp = {k:tuple_dict_temp[v] for k,v in temp_centroids_dict.items()}
-                    self.resource_file_dict.update(resource_file_dict_temp)              
-            
+                    self.resource_file_dict.update(resource_file_dict_temp) 
+
+                    # alter BestLookup.best_ranking_df to be saved for analyzing / visualizing results
+                    missing_regions = pd.DataFrame({"region": missing_regions, "point": list(temp_centroids_dict.values()), "tech": self.tech})
+                    missing_regions['lon'] = missing_regions.point.apply(lambda x: x[1])
+                    missing_regions['lat'] = missing_regions.point.apply(lambda x: x[0])
+                    missing_regions.rename(columns = {'region': self.aggregate_region}, inplace=True)
+
+                    BestLookup.best_ranking_df = pd.concat([BestLookup.best_ranking_df, missing_regions])
+                
+                BestLookup.best_ranking_df.drop(columns="geometry").to_csv(os.path.join("data", "reV_resource_supply_curves", f"best_supply_curve_{self.aggregate_region}_{self.tech}.csv"))
+
             else: 
 
                 # --- Get lookup of centroids ---
