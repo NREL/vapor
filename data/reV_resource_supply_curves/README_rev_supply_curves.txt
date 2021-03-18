@@ -1,0 +1,1 @@
+based on analysis by Katy Waechter and Travis Williams of NREL's reV team. Csv's contain several sets of point for each balancing area indicating the coordinates of sites that can host 100 MW wind and PV systems (based on distance to interconnection and siting exclusions), with the best LCOE values
