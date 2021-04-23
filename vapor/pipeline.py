@@ -108,8 +108,8 @@ class RegionalPipeline():
 
                 # alter BestLookup.best_ranking_df to be saved for analyzing / visualizing results
                 missing_regions = pd.DataFrame({"region": missing_regions, "point": list(temp_centroids_dict.values()), "tech": self.tech})
-                missing_regions['lon'] = missing_regions.point.apply(lambda x: x[1])
-                missing_regions['lat'] = missing_regions.point.apply(lambda x: x[0])
+                missing_regions['lon'] = missing_regions.point.apply(lambda x: x[0])
+                missing_regions['lat'] = missing_regions.point.apply(lambda x: x[1])
                 missing_regions.rename(columns = {'region': self.aggregate_region}, inplace=True)
 
                 BestLookup.best_ranking_df = pd.concat([BestLookup.best_ranking_df, missing_regions])
