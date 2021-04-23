@@ -7,6 +7,7 @@ import logging
 log = logging.getLogger("vapor")
 
 def regional(scenario, tech, aggregate_region, batt_size, batt_duration, opt_var):
+
     log.info(f"Working on regional run for {scenario}, {opt_var}, {tech}, {batt_size}/{batt_duration} batt")
 
     # --- Initialize Pipeline ---
@@ -29,7 +30,7 @@ def regional(scenario, tech, aggregate_region, batt_size, batt_duration, opt_var
     # --- Save ---
     best['scenario'] = scenario
     best['batt_size'] = batt_size
-    if config.SAMPLING_BEST:
+    if vapor.config.SAMPLING_BEST:
         best.to_pickle(os.path.join('results', "best_by_region", f"{aggregate_region}_best_{tech}_{scenario}_{opt_var}_batt_{batt_size}_{batt_duration}.pkl"))
     else:
         best.to_pickle(os.path.join('results',f"{aggregate_region}_best_{tech}_{scenario}_{opt_var}_batt_{batt_size}_{batt_duration}.pkl"))
@@ -93,7 +94,7 @@ def constrain(scenario, tech, aggregate_region, opt_var, goal_pct, goal_type):
 
     # --- Save ---
     best['scenario'] = scenario
-    if config.SAMPLING_BEST:
+    if vapor.config.SAMPLING_BEST:
         best.to_pickle(os.path.join('results', "best_by_region", f"{aggregate_region}_best_{tech}_{scenario}_{opt_var}_constraint_{goal_type}_{goal_pct}.pkl"))
     else:
         best.to_pickle(os.path.join('results',f"{aggregate_region}_best_{tech}_{scenario}_{opt_var}_constraint_{goal_type}_{goal_pct}.pkl"))

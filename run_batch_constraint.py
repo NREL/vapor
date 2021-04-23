@@ -62,7 +62,6 @@ def write_bash(opt_var, scenario, tech, goal_pct, goal_type):
     
     elif HPC == 'hermes':
         script = f"python run_cli.py --scenario={scenario} --tech={tech} --opt_var={opt_var} --aggregate_region={aggregate_region} --mode={mode} --goal_pct={goal_pct} --goal_type={goal_type}"
-        breakpoint()
         subprocess.call(script, shell=True)
 
 
