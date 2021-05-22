@@ -88,7 +88,7 @@ class BayesianSystemDesigner():
                         'system_capacity': self.re_capacity_kw,
                         'subarray1_track_mode': 1, #np.array([0, 1, 2, 4]), #1 = fixed
                         'subarray1_tilt': np.arange(0, 90, 10),
-                        'subarray1_azimuth': np.arange(1, 359, 10),
+                        'subarray1_azimuth': np.arange(80, 280, 10),
                         'dc_ac_ratio': np.arange(0.8, 1.3, 0.1),
                     }
                 }

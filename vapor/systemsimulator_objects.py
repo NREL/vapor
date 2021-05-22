@@ -298,7 +298,7 @@ class BayesianSimulatorAddon():
         self._flatten_param_grid()
         
         # --- initialize optimizer ---
-        bounds_transformer = SequentialDomainReductionTransformer()
+        bounds_transformer = SequentialDomainReductionTransformer(eta=0.95, gamma_osc=0.95)
         optimizer = BayesianOptimization(
             f=self._worker_return_score,
             pbounds=self.bayes_grid,
