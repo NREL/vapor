@@ -50,3 +50,9 @@ THREAD_WORKERS = 8#int(os.cpu_count() / 2)
 
 # --- RESOURCE SAMPLING --- # NEW: THOMAS BOWEN 03182021
 SAMPLING_BEST = True # will choose to pick the 'best' resource site in a region rather than the centroid of that region
+
+# --- SPOT CHECKING VALUES --- # NEW: THOMAS BOWEN 05222021
+# when these regions are processed by models Wind and PV Generic plants, the market profile and system configs will be saved to be checked in SAM
+# see the notebook 'rerunning_results_with_new_resource_selection' for how these areas were selected
+REGIONS_SPOT_CHECK_WIND = ['p4', 'p33', 'p56', 'p85', 'texas'] 
+REGIONS_SPOT_CHECK_PV = ['p10',  'p13',  'p29', 'p33', 'p91', 'p92', 'p94', 'p129', 'p130', 'p134'] 

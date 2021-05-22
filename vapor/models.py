@@ -519,6 +519,11 @@ class PVMerchantPlant(GenericMerchantPlant):
     def make_market_profile(self):
         self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_grid_value')
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
+        # for spotchecking outliers due to revenue changes between resource sampling paradigms
+        if self.region in config.REGIONS_SPOT_CHECK_PV:
+            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'pv_{self.region}_market_profile.csv'), header=False, index=False)
+            with open(os.path.join('data', 'spot_check', f'pv_{self.region}_systemconfig.json'), 'a') as config_file:
+                json.dump(self.system_config, config_file)
 
     def _size_system(self):
         # --- Calc number of strings and inverters ---
@@ -551,7 +556,7 @@ class PVMerchantPlant(GenericMerchantPlant):
         self.generator.execute()
 
 class WindMerchantPlant(GenericMerchantPlant):
-
+    
     def make_gen_profile_no_batt(self):
         """Necessarily does not have battery."""
         assert len(self.generator.Outputs.gen) == 8760
@@ -569,6 +574,11 @@ class WindMerchantPlant(GenericMerchantPlant):
     def make_market_profile(self):
         self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_grid_value')
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
+        # for spotchecking outliers due to revenue changes between resource sampling paradigms
+        if self.region in config.REGIONS_SPOT_CHECK_WIND:
+            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'wind_{self.region}_market_profile.csv'), header=False, index=False)
+            with open(os.path.join('data', 'spot_check', f'wind_{self.region}_systemconfig.json'), 'a') as config_file:
+                json.dump(self.system_config, config_file)
 
     def _set_num_turbines_in_row(self, n_turbines, rotor_diameter=77, spacing=None, angle_deg=0):
         xcoords = []
