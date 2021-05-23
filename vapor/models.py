@@ -522,7 +522,7 @@ class PVMerchantPlant(GenericMerchantPlant):
         # for spotchecking outliers due to revenue changes between resource sampling paradigms
         if self.region in config.REGIONS_SPOT_CHECK_PV:
             pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'pv_{self.region}_market_profile.csv'), header=False, index=False)
-            with open(os.path.join('data', 'spot_check', f'pv_{self.region}_systemconfig.json'), 'a') as config_file:
+            with open(os.path.join('data', 'spot_check', f'pv_{self.region}_systemconfig.json'), 'wt') as config_file:
                 json.dump(self.system_config, config_file)
 
     def _size_system(self):
@@ -577,7 +577,7 @@ class WindMerchantPlant(GenericMerchantPlant):
         # for spotchecking outliers due to revenue changes between resource sampling paradigms
         if self.region in config.REGIONS_SPOT_CHECK_WIND:
             pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'wind_{self.region}_market_profile.csv'), header=False, index=False)
-            with open(os.path.join('data', 'spot_check', f'wind_{self.region}_systemconfig.json'), 'a') as config_file:
+            with open(os.path.join('data', 'spot_check', f'wind_{self.region}_systemconfig.json'), 'wt') as config_file:
                 json.dump(self.system_config, config_file)
 
     def _set_num_turbines_in_row(self, n_turbines, rotor_diameter=77, spacing=None, angle_deg=0):
