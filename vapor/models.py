@@ -3,6 +3,7 @@ import logging
 import random
 import json
 import os
+import shutil
 import concurrent.futures as cf
 import itertools
 import datetime
@@ -521,9 +522,13 @@ class PVMerchantPlant(GenericMerchantPlant):
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
         # for spotchecking outliers due to revenue changes between resource sampling paradigms
         if self.region in config.REGIONS_SPOT_CHECK_PV:
-            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'pv_{self.region}_market_profile.csv'), header=False, index=False)
-            with open(os.path.join('data', 'spot_check', f'pv_{self.region}_systemconfig.json'), 'wt') as config_file:
+            # save market profile
+            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', 'market_profiles', f'pv_{self.region}_market_profile.csv'), header=False, index=False)
+            # save config file
+            with open(os.path.join('data', 'spot_check', 'system_config', f'pv_{self.region}_systemconfig.json'), 'wt') as config_file:
                 json.dump(self.system_config, config_file)
+            # save weather file
+            shutil.copyfile(self.resource_file, os.path.join('data', 'spot_check', 'weather_files', f'pv_{self.region}_'+self.resource_file.split('/')[-1]))
 
     def _size_system(self):
         # --- Calc number of strings and inverters ---
@@ -572,13 +577,18 @@ class WindMerchantPlant(GenericMerchantPlant):
         assert len(self.gen_profile) == 8760 * self.cambium.analysis_period
 
     def make_market_profile(self):
+        breakpoint()
         self.market_profile = self.cambium.calc_cambium_lifetime_rev_tuple(self.gen_profile, 'cambium_grid_value')
         assert len(self.market_profile) == 8760 * self.cambium.analysis_period
         # for spotchecking outliers due to revenue changes between resource sampling paradigms
         if self.region in config.REGIONS_SPOT_CHECK_WIND:
-            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', f'wind_{self.region}_market_profile.csv'), header=False, index=False)
-            with open(os.path.join('data', 'spot_check', f'wind_{self.region}_systemconfig.json'), 'wt') as config_file:
+            # save market profile
+            pd.DataFrame(self.market_profile).to_csv(os.path.join('data', 'spot_check', 'market_profiles', f'wind_{self.region}_market_profile.csv'), header=False, index=False)
+            #save system config file
+            with open(os.path.join('data', 'spot_check', 'system_config', f'wind_{self.region}_systemconfig.json'), 'wt') as config_file:
                 json.dump(self.system_config, config_file)
+            # save weather file
+            shutil.copyfile(self.resource_file, os.path.join('data', 'spot_check', 'weather_files', f'wind_{self.region}_'+self.resource_file.split('/')[-1]))
 
     def _set_num_turbines_in_row(self, n_turbines, rotor_diameter=77, spacing=None, angle_deg=0):
         xcoords = []
